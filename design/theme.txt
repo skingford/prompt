@@ -1,0 +1,19 @@
+:root {
+    --primary: 14 14 14;
+    --primary-light: 212 162 127;
+    --primary-dark: 14 14 14;
+    --tooltip-foreground: 255 255 255;
+    --background-light: 253 253 247;
+    --background-dark: 9 9 11;
+    --gray-50: 243 243 243;
+    --gray-100: 238 238 238;
+    --gray-200: 222 222 222;
+    --gray-300: 206 206 206;
+    --gray-400: 158 158 158;
+    --gray-500: 112 112 112;
+    --gray-600: 80 80 80;
+    --gray-700: 62 62 62;
+    --gray-800: 37 37 37;
+    --gray-900: 23 23 23;
+    --gray-950: 10 10 10;
+}
