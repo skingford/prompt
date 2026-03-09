@@ -540,17 +540,22 @@
                   "name": "resultCard",
                   "width": "fill_container",
                   "height": 420,
-                  "fill": "#0E0E0E",
+                  "fill": "#FFFFFF",
                   "cornerRadius": 14,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#DEDEDE"
+                  },
                   "effect": {
                     "type": "shadow",
                     "shadowType": "outer",
-                    "color": "#0000001A",
+                    "color": "#0000000A",
                     "offset": {
                       "x": 0,
-                      "y": 12
+                      "y": 8
                     },
-                    "blur": 24
+                    "blur": 22
                   },
                   "layout": "vertical",
                   "gap": 12,
@@ -560,7 +565,7 @@
                       "type": "text",
                       "id": "eZ80O",
                       "name": "resultTitle",
-                      "fill": "#FFFFFF",
+                      "fill": "#171717",
                       "content": "优化结果预览",
                       "fontFamily": "Inter",
                       "fontSize": 17,
@@ -572,12 +577,12 @@
                       "name": "resultBox",
                       "width": "fill_container",
                       "height": "fill_container",
-                      "fill": "#171717",
+                      "fill": "#FDFBF8",
                       "cornerRadius": 10,
                       "stroke": {
                         "align": "inside",
                         "thickness": 1,
-                        "fill": "#3E3E3E"
+                        "fill": "#E8DED4"
                       },
                       "layout": "vertical",
                       "gap": 10,
@@ -595,8 +600,13 @@
                               "id": "FGUFV",
                               "name": "chip1",
                               "height": 24,
-                              "fill": "#3A2A1F",
+                              "fill": "#F3E6DC",
                               "cornerRadius": 999,
+                              "stroke": {
+                                "align": "inside",
+                                "thickness": 1,
+                                "fill": "#E3CDBA"
+                              },
                               "padding": [
                                 0,
                                 8
@@ -608,7 +618,7 @@
                                   "type": "text",
                                   "id": "q22aG",
                                   "name": "chip1t",
-                                  "fill": "#F7D9C1",
+                                  "fill": "#704F3A",
                                   "content": "受众",
                                   "fontFamily": "Inter",
                                   "fontSize": 11,
@@ -621,8 +631,13 @@
                               "id": "Pb6LL",
                               "name": "chip2",
                               "height": 24,
-                              "fill": "#3A2A1F",
+                              "fill": "#F3E6DC",
                               "cornerRadius": 999,
+                              "stroke": {
+                                "align": "inside",
+                                "thickness": 1,
+                                "fill": "#E3CDBA"
+                              },
                               "padding": [
                                 0,
                                 8
@@ -634,7 +649,7 @@
                                   "type": "text",
                                   "id": "152gp",
                                   "name": "chip2t",
-                                  "fill": "#F7D9C1",
+                                  "fill": "#704F3A",
                                   "content": "语气",
                                   "fontFamily": "Inter",
                                   "fontSize": 11,
@@ -647,8 +662,13 @@
                               "id": "oWdlU",
                               "name": "chip3",
                               "height": 24,
-                              "fill": "#3A2A1F",
+                              "fill": "#F3E6DC",
                               "cornerRadius": 999,
+                              "stroke": {
+                                "align": "inside",
+                                "thickness": 1,
+                                "fill": "#E3CDBA"
+                              },
                               "padding": [
                                 0,
                                 8
@@ -660,7 +680,7 @@
                                   "type": "text",
                                   "id": "frMVt",
                                   "name": "chip3t",
-                                  "fill": "#F7D9C1",
+                                  "fill": "#704F3A",
                                   "content": "输出",
                                   "fontFamily": "Inter",
                                   "fontSize": 11,
@@ -674,7 +694,7 @@
                           "type": "text",
                           "id": "dGHM7",
                           "name": "r1",
-                          "fill": "#EEEEEE",
+                          "fill": "#505050",
                           "textGrowth": "fixed-width",
                           "width": "fill_container",
                           "content": "你是一名资深内容策划，请根据以下产品信息输出口播稿：",
@@ -686,7 +706,7 @@
                           "type": "text",
                           "id": "bcL7X",
                           "name": "r2",
-                          "fill": "#E3B995",
+                          "fill": "#B9784E",
                           "content": "1) 受众：厨房新手",
                           "fontFamily": "Inter",
                           "fontSize": 13,
@@ -696,7 +716,7 @@
                           "type": "text",
                           "id": "qENmw",
                           "name": "r3",
-                          "fill": "#E3B995",
+                          "fill": "#B9784E",
                           "content": "2) 语气：专业但亲切",
                           "fontFamily": "Inter",
                           "fontSize": 13,
@@ -706,7 +726,7 @@
                           "type": "text",
                           "id": "o4VvH",
                           "name": "r4",
-                          "fill": "#E3B995",
+                          "fill": "#B9784E",
                           "content": "3) 输出：3段短句 + 明确行动号召",
                           "fontFamily": "Inter",
                           "fontSize": 13,
