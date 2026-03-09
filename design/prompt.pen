@@ -9,7 +9,25 @@
       "name": "Prompt Optimizer Web",
       "width": 1440,
       "height": 1024,
-      "fill": "#FDFDF7",
+      "fill": {
+        "type": "gradient",
+        "gradientType": "linear",
+        "enabled": true,
+        "rotation": 180,
+        "size": {
+          "height": 1
+        },
+        "colors": [
+          {
+            "color": "#FDFDF7",
+            "position": 0
+          },
+          {
+            "color": "#F8F7F2",
+            "position": 1
+          }
+        ]
+      },
       "layout": "vertical",
       "children": [
         {
@@ -18,13 +36,23 @@
           "name": "nav",
           "width": "fill_container",
           "height": 76,
-          "fill": "#FDFDF7",
+          "fill": "#FFFFFF",
           "stroke": {
             "align": "inside",
             "thickness": {
               "bottom": 1
             },
             "fill": "#DEDEDE"
+          },
+          "effect": {
+            "type": "shadow",
+            "shadowType": "outer",
+            "color": "#00000008",
+            "offset": {
+              "x": 0,
+              "y": 1
+            },
+            "blur": 8
           },
           "padding": [
             0,
@@ -73,12 +101,12 @@
                   "name": "btnGhost",
                   "width": 104,
                   "height": 40,
-                  "fill": "#F3F3F3",
+                  "fill": "#F3E6DC",
                   "cornerRadius": 8,
                   "stroke": {
                     "align": "inside",
                     "thickness": 1,
-                    "fill": "#DEDEDE"
+                    "fill": "#EBD3C2"
                   },
                   "justifyContent": "center",
                   "alignItems": "center",
@@ -87,11 +115,11 @@
                       "type": "text",
                       "id": "K3t3A",
                       "name": "btnGhostText",
-                      "fill": "#3E3E3E",
+                      "fill": "#704F3A",
                       "content": "示例",
                       "fontFamily": "Inter",
                       "fontSize": 14,
-                      "fontWeight": "500"
+                      "fontWeight": "600"
                     }
                   ]
                 },
@@ -101,8 +129,18 @@
                   "name": "btnPrimary",
                   "width": 128,
                   "height": 40,
-                  "fill": "#0E0E0E",
-                  "cornerRadius": 8,
+                  "fill": "#D4A27F",
+                  "cornerRadius": 10,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#D4A27F55",
+                    "offset": {
+                      "x": 0,
+                      "y": 6
+                    },
+                    "blur": 12
+                  },
                   "justifyContent": "center",
                   "alignItems": "center",
                   "children": [
@@ -110,11 +148,11 @@
                       "type": "text",
                       "id": "SfPli",
                       "name": "btnPrimaryText",
-                      "fill": "#FFFFFF",
+                      "fill": "#0E0E0E",
                       "content": "立即优化",
                       "fontFamily": "Inter",
                       "fontSize": 14,
-                      "fontWeight": "600"
+                      "fontWeight": "700"
                     }
                   ]
                 }
@@ -147,24 +185,76 @@
                   "name": "hero",
                   "width": "fill_container",
                   "fill": "#FFFFFF",
-                  "cornerRadius": 12,
+                  "cornerRadius": 14,
                   "stroke": {
                     "align": "inside",
                     "thickness": 1,
                     "fill": "#DEDEDE"
+                  },
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#0000000A",
+                    "offset": {
+                      "x": 0,
+                      "y": 8
+                    },
+                    "blur": 24
                   },
                   "layout": "vertical",
                   "gap": 8,
                   "padding": 24,
                   "children": [
                     {
+                      "type": "frame",
+                      "id": "8rYgZ",
+                      "name": "badge",
+                      "height": 28,
+                      "fill": "#F3E6DC",
+                      "cornerRadius": 999,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#EBD3C2"
+                      },
+                      "gap": 6,
+                      "padding": [
+                        0,
+                        10
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "tibAt",
+                          "name": "badgeDot",
+                          "width": 8,
+                          "height": 8,
+                          "fill": "#D4A27F",
+                          "cornerRadius": 99
+                        },
+                        {
+                          "type": "text",
+                          "id": "4tC1J",
+                          "name": "badgeText",
+                          "fill": "#704F3A",
+                          "content": "智能优化模式",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
                       "type": "text",
                       "id": "O8rAb",
                       "name": "heroTitle",
                       "fill": "#0E0E0E",
                       "content": "把普通提示词，变成高质量可执行指令",
+                      "lineHeight": 1.2,
                       "fontFamily": "Inter",
-                      "fontSize": 28,
+                      "fontSize": 30,
                       "fontWeight": "700"
                     },
                     {
@@ -173,8 +263,9 @@
                       "name": "heroDesc",
                       "fill": "#505050",
                       "content": "支持角色、目标、约束、输出格式自动补全，减少来回修改。",
+                      "lineHeight": 1.5,
                       "fontFamily": "Inter",
-                      "fontSize": 15,
+                      "fontSize": 14,
                       "fontWeight": "normal"
                     }
                   ]
@@ -186,11 +277,21 @@
                   "width": "fill_container",
                   "height": "fill_container",
                   "fill": "#FFFFFF",
-                  "cornerRadius": 12,
+                  "cornerRadius": 14,
                   "stroke": {
                     "align": "inside",
                     "thickness": 1,
                     "fill": "#DEDEDE"
+                  },
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#0000000A",
+                    "offset": {
+                      "x": 0,
+                      "y": 10
+                    },
+                    "blur": 30
                   },
                   "layout": "vertical",
                   "gap": 14,
@@ -224,8 +325,13 @@
                           "cornerRadius": 10,
                           "stroke": {
                             "align": "inside",
-                            "thickness": 1,
-                            "fill": "#DEDEDE"
+                            "thickness": 1.5,
+                            "fill": "#D4A27F"
+                          },
+                          "effect": {
+                            "type": "shadow",
+                            "shadowType": "outer",
+                            "color": "#D4A27F33"
                           },
                           "layout": "vertical",
                           "padding": 14,
@@ -282,7 +388,7 @@
                               "stroke": {
                                 "align": "inside",
                                 "thickness": 1,
-                                "fill": "#CECECE"
+                                "fill": "#D9B79D"
                               },
                               "padding": [
                                 0,
@@ -333,7 +439,7 @@
                               "stroke": {
                                 "align": "inside",
                                 "thickness": 1,
-                                "fill": "#CECECE"
+                                "fill": "#D9B79D"
                               },
                               "padding": [
                                 0,
@@ -383,6 +489,21 @@
                           "height": 44,
                           "fill": "#D4A27F",
                           "cornerRadius": 10,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "#C8936F"
+                          },
+                          "effect": {
+                            "type": "shadow",
+                            "shadowType": "outer",
+                            "color": "#D4A27F66",
+                            "offset": {
+                              "x": 0,
+                              "y": 6
+                            },
+                            "blur": 14
+                          },
                           "justifyContent": "center",
                           "alignItems": "center",
                           "children": [
@@ -420,7 +541,17 @@
                   "width": "fill_container",
                   "height": 420,
                   "fill": "#0E0E0E",
-                  "cornerRadius": 12,
+                  "cornerRadius": 14,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#0000001A",
+                    "offset": {
+                      "x": 0,
+                      "y": 12
+                    },
+                    "blur": 24
+                  },
                   "layout": "vertical",
                   "gap": 12,
                   "padding": 18,
@@ -432,7 +563,7 @@
                       "fill": "#FFFFFF",
                       "content": "优化结果预览",
                       "fontFamily": "Inter",
-                      "fontSize": 16,
+                      "fontSize": 17,
                       "fontWeight": "600"
                     },
                     {
@@ -453,6 +584,93 @@
                       "padding": 14,
                       "children": [
                         {
+                          "type": "frame",
+                          "id": "wpPOt",
+                          "name": "keyRow",
+                          "width": "fill_container",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "FGUFV",
+                              "name": "chip1",
+                              "height": 24,
+                              "fill": "#3A2A1F",
+                              "cornerRadius": 999,
+                              "padding": [
+                                0,
+                                8
+                              ],
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "q22aG",
+                                  "name": "chip1t",
+                                  "fill": "#F7D9C1",
+                                  "content": "受众",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "Pb6LL",
+                              "name": "chip2",
+                              "height": 24,
+                              "fill": "#3A2A1F",
+                              "cornerRadius": 999,
+                              "padding": [
+                                0,
+                                8
+                              ],
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "152gp",
+                                  "name": "chip2t",
+                                  "fill": "#F7D9C1",
+                                  "content": "语气",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "oWdlU",
+                              "name": "chip3",
+                              "height": 24,
+                              "fill": "#3A2A1F",
+                              "cornerRadius": 999,
+                              "padding": [
+                                0,
+                                8
+                              ],
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "frMVt",
+                                  "name": "chip3t",
+                                  "fill": "#F7D9C1",
+                                  "content": "输出",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
                           "type": "text",
                           "id": "dGHM7",
                           "name": "r1",
@@ -468,31 +686,31 @@
                           "type": "text",
                           "id": "bcL7X",
                           "name": "r2",
-                          "fill": "#D4A27F",
+                          "fill": "#E3B995",
                           "content": "1) 受众：厨房新手",
                           "fontFamily": "Inter",
                           "fontSize": 13,
-                          "fontWeight": "normal"
+                          "fontWeight": "600"
                         },
                         {
                           "type": "text",
                           "id": "qENmw",
                           "name": "r3",
-                          "fill": "#D4A27F",
+                          "fill": "#E3B995",
                           "content": "2) 语气：专业但亲切",
                           "fontFamily": "Inter",
                           "fontSize": 13,
-                          "fontWeight": "normal"
+                          "fontWeight": "600"
                         },
                         {
                           "type": "text",
                           "id": "o4VvH",
                           "name": "r4",
-                          "fill": "#D4A27F",
+                          "fill": "#E3B995",
                           "content": "3) 输出：3段短句 + 明确行动号召",
                           "fontFamily": "Inter",
                           "fontSize": 13,
-                          "fontWeight": "normal"
+                          "fontWeight": "600"
                         }
                       ]
                     }
@@ -504,11 +722,21 @@
                   "name": "tipsCard",
                   "width": "fill_container",
                   "fill": "#FFFFFF",
-                  "cornerRadius": 12,
+                  "cornerRadius": 14,
                   "stroke": {
                     "align": "inside",
                     "thickness": 1,
                     "fill": "#DEDEDE"
+                  },
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#0000000A",
+                    "offset": {
+                      "x": 0,
+                      "y": 8
+                    },
+                    "blur": 22
                   },
                   "layout": "vertical",
                   "gap": 10,
@@ -521,7 +749,7 @@
                       "fill": "#171717",
                       "content": "优化建议",
                       "fontFamily": "Inter",
-                      "fontSize": 16,
+                      "fontSize": 17,
                       "fontWeight": "600"
                     },
                     {
@@ -567,8 +795,52 @@
                   "id": "WcNbC",
                   "name": "cta",
                   "width": "fill_container",
-                  "fill": "#D4A27F",
-                  "cornerRadius": 12,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 180,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#E2B58F",
+                        "position": 0
+                      },
+                      {
+                        "color": "#D4A27F",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 14,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#C8936F"
+                  },
+                  "effect": [
+                    {
+                      "type": "shadow",
+                      "shadowType": "outer",
+                      "color": "#D4A27F66",
+                      "offset": {
+                        "x": 0,
+                        "y": 8
+                      },
+                      "blur": 18
+                    },
+                    {
+                      "type": "shadow",
+                      "shadowType": "outer",
+                      "color": "#FFFFFF55",
+                      "offset": {
+                        "x": 0,
+                        "y": -1
+                      }
+                    }
+                  ],
                   "layout": "vertical",
                   "gap": 6,
                   "padding": 16,
@@ -580,10 +852,10 @@
                       "fill": "#0E0E0E",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "content": "升级 Pro 解锁行业模板与团队协作",
+                      "content": "升级 Pro 立即体验 →",
                       "fontFamily": "Inter",
-                      "fontSize": 14,
-                      "fontWeight": "600"
+                      "fontSize": 15,
+                      "fontWeight": "700"
                     },
                     {
                       "type": "text",
