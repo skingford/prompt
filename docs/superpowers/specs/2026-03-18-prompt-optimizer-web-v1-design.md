@@ -1,192 +1,191 @@
-# Prompt Optimizer Web V1 - Frontend Design Spec
+# 提示词优化工具 Web V1 - 前端设计规格
 
-## Overview
+## 概述
 
-A personal prompt optimization tool for the web. Workbench-style layout supporting iterative prompt optimization with diagnosis, structured rewriting, and multi-version comparison.
+个人提示词优化 Web 工具。工作台式布局，支持迭代式提示词优化，包含诊断、结构化改写和多版本对比功能。
 
-**Scope:** Web frontend only (V1). No history management, no mobile, no i18n.
-
----
-
-## Pages
-
-| Page | Description |
-|------|-------------|
-| Login | Existing design. Username + password, token-based session, auto-redirect on expiry |
-| Workbench | Core functionality page, left-right dual-panel layout |
+**范围：** 仅 Web 前端（V1）。不含历史管理、移动端适配、国际化。
 
 ---
 
-## Workbench Layout
+## 页面
 
-```
+| 页面 | 说明 |
+|------|------|
+| 登录页 | 沿用已有设计。用户名 + 密码，基于 token 的会话，过期自动跳转 |
+| 工作台 | 核心功能页，左右双栏布局 |
+
+---
+
+## 工作台布局
+
+```text
 ┌─────────────────────────────────────────────────────┐
-│  Top Bar: Logo / Model Selector / Theme Toggle /    │
-│           Avatar + Logout                           │
+│  顶栏：Logo / 模型选择 / 主题切换 / 头像+退出        │
 ├────────────────────┬────────────────────────────────┤
 │                    │                                │
-│   Left Panel       │   Right Panel                  │
-│   (~40% width)     │   (~60% width)                 │
+│   左栏              │   右栏                         │
+│   (~40% 宽度)       │   (~60% 宽度)                  │
 │                    │                                │
-│  ┌──────────────┐  │  ┌─ [Diagnose] [V1] [V2] ──┐  │
-│  │              │  │  │                          │  │
-│  │  Prompt      │  │  │  Active tab content      │  │
-│  │  Editor      │  │  │                          │  │
-│  │              │  │  │                          │  │
-│  │              │  │  │                          │  │
-│  └──────────────┘  │  │                          │  │
-│                    │  │                          │  │
-│  [Diagnose] [Opt]  │  └──────────────────────────┘  │
+│  ┌──────────────┐  │  ┌─ [诊断] [版本1] [版本2] ──┐  │
+│  │              │  │  │                           │  │
+│  │  提示词       │  │  │  当前 tab 内容             │  │
+│  │  编辑器       │  │  │                           │  │
+│  │              │  │  │                           │  │
+│  │              │  │  │                           │  │
+│  └──────────────┘  │  │                           │  │
+│                    │  │                           │  │
+│  [诊断] [优化]     │  └───────────────────────────┘  │
 │                    │                                │
 ├────────────────────┴────────────────────────────────┤
 └─────────────────────────────────────────────────────┘
 ```
 
-- Draggable divider between left and right panels for free resizing.
-- Desktop-first, optimized for 1280px+ screens.
+- 左右栏之间有可拖拽的分割线，自由调整比例。
+- 桌面端优先，针对 1280px+ 屏幕优化。
 
 ---
 
-## Top Bar
+## 顶栏
 
-| Element | Description |
-|---------|-------------|
-| Logo | App brand, left-aligned |
-| Model Selector | Dropdown, model list driven by backend API. Each item: name, identifier, availability. Unavailable models shown greyed out with "Not Configured" label |
-| Theme Toggle | Sun/moon icon button, switches light/dark mode |
-| User Avatar + Logout | Right-aligned, click avatar to show logout option |
-
----
-
-## Left Panel - Input Area
-
-### Prompt Editor
-
-- Large textarea, occupies main area of left panel
-- Monospace font for clear structure visibility
-- Character count display at top-right corner
-- Supports Tab indentation and basic text editing shortcuts
-
-### Action Buttons
-
-Two buttons below the editor, horizontally aligned:
-
-| Button | Action | Behavior |
-|--------|--------|----------|
-| **Diagnose** | Analyze prompt issues | Sends prompt to backend, results appear in right panel "Diagnose" tab |
-| **Optimize** | Generate optimized version | Sends prompt to backend, adds new version tab in right panel |
-
-### Input Validation
-
-- Both buttons are **disabled** when the editor is empty (whitespace-only counts as empty).
-- No character limit enforced in V1.
+| 元素 | 说明 |
+|------|------|
+| Logo | 应用品牌标识，左对齐 |
+| 模型选择 | 下拉菜单，模型列表由后端接口驱动。每项包含：名称、标识符、是否可用。不可用的模型置灰并标注「未配置」 |
+| 主题切换 | 太阳/月亮图标按钮，切换亮色/暗色模式 |
+| 用户头像 + 退出 | 右对齐，点击头像显示退出选项 |
 
 ---
 
-## Right Panel - Results Area
+## 左栏 - 输入区
 
-### Tab Bar
+### 提示词编辑器
 
-Dynamically generated tabs:
+- 大文本框，占据左栏主要区域
+- 等宽字体，方便查看结构
+- 右上角显示字符数统计
+- 支持 Tab 缩进和基本文本编辑快捷键
 
+### 操作按钮
+
+编辑器下方两个按钮，水平排列：
+
+| 按钮 | 功能 | 行为 |
+|------|------|------|
+| **诊断** | 分析提示词问题 | 发送提示词到后端，结果显示在右栏「诊断」tab |
+| **优化** | 生成优化版本 | 发送提示词到后端，右栏新增一个版本 tab |
+
+### 输入校验
+
+- 编辑器为空时（纯空白也算空），两个按钮均 **禁用**。
+- V1 不限制字符数上限。
+
+---
+
+## 右栏 - 结果区
+
+### Tab 栏
+
+动态生成的标签页：
+
+```text
+[ 诊断 ] [ 版本 1 ] [ 版本 2 ] [ 版本 3 ] ...
 ```
-[ Diagnose ] [ Version 1 ] [ Version 2 ] [ Version 3 ] ...
-```
 
-- **Diagnose tab**: Appears after first diagnosis. Fixed at leftmost position. Cannot be closed. Re-diagnosis overwrites content.
-- **Version tabs**: New tab added per optimization. Sequentially numbered. Closeable via "x" on tab. Maximum **10 version tabs** open at once; exceeding this shows a prompt to close old tabs.
-- **Initial state** (before any action): Right panel shows a centered placeholder message, e.g., "Enter a prompt and click Diagnose or Optimize to get started."
-- **Re-diagnosis**: Existing version tabs are **kept** — they remain useful as reference even if the diagnosis context has changed.
+- **诊断 tab**：首次诊断后出现，固定在最左侧，不可关闭。再次诊断时覆盖内容。
+- **版本 tab**：每次优化新增一个，按顺序编号，可通过 tab 上的「x」关闭。最多同时打开 **10 个版本 tab**，超出时提示关闭旧 tab。
+- **初始状态**（未执行任何操作时）：右栏显示居中占位提示，如「输入提示词后点击 诊断 或 优化 开始使用」。
+- **重新诊断**：已有的版本 tab **保留** — 即使诊断上下文已变化，版本仍可作为参考。
 
-### Diagnose Tab Content
+### 诊断 Tab 内容
 
-Card list layout, each card contains:
+卡片列表布局，每张卡片包含：
 
-- **Issue type tag** (e.g., Vague, Missing, Contradictory, Redundant)
-- **Issue description** - Pinpoints the specific problem
-- **Improvement suggestion** - Concrete direction for fix
+- **问题类型标签**（如：模糊、缺失、矛盾、冗余）
+- **问题描述** — 指出具体问题所在
+- **改进建议** — 给出具体的修改方向
 
-Bottom action: **"Optimize based on diagnosis"** button - generates an optimized version informed by the diagnosis results. This is the **only** path that sends the `diagnosis` field to the backend. The left panel "Optimize" button always sends a plain optimization request without diagnosis context.
+底部操作：**「根据诊断结果优化」** 按钮 — 基于诊断结果生成优化版本。这是 **唯一** 会向后端发送 `diagnosis` 字段的路径。左栏的「优化」按钮始终发送不含诊断上下文的普通优化请求。
 
-### Version Tab Content
+### 版本 Tab 内容
 
-- **Top area**: Full optimized prompt text (selectable, copyable)
-- **Bottom action bar**:
+- **上方区域**：完整的优化后提示词文本（可选中、可复制）
+- **底部操作栏**：
 
-| Button | Action |
-|--------|--------|
-| **Adopt** | Copy this version back into left panel editor for further iteration |
-| **Copy** | Copy to clipboard |
-| **Compare** | Show diff view against current left panel input |
+| 按钮 | 功能 |
+|------|------|
+| **采纳** | 将此版本回填到左栏编辑器，继续迭代 |
+| **复制** | 复制到剪贴板 |
+| **对比** | 与左栏当前输入做 diff 对比 |
 
-### Diff / Compare Mode
+### Diff / 对比模式
 
-Activated by clicking "Compare" on a version tab:
+点击版本 tab 的「对比」按钮激活：
 
-- **Granularity**: Word-level diff, computed client-side
-- **Layout**: Inline unified view, replaces the version tab content area
-- Red background = deleted content
-- Green background = added content
-- "Exit Compare" button at top to return to normal view
+- **粒度**：词级别 diff，客户端计算
+- **布局**：行内统一视图，替换版本 tab 的内容区域
+- 红色背景 = 删除的内容
+- 绿色背景 = 新增的内容
+- 顶部显示「退出对比」按钮，点击回到普通视图
 
 ---
 
-## Iteration Flow
+## 迭代流程
 
-1. User writes/pastes prompt in left panel editor
-2. Clicks "Diagnose" to analyze issues → results in right panel Diagnose tab
-3. Clicks "Optimize" (or "Optimize based on diagnosis") → new version tab appears
-4. Can click "Optimize" again for additional versions
-5. Uses "Compare" to diff any version against current input
-6. Clicks "Adopt" on preferred version → fills back into left panel
-7. Repeats from step 2 for further refinement
+1. 用户在左栏编辑器中编写/粘贴提示词
+2. 点击「诊断」分析问题 → 结果显示在右栏诊断 tab
+3. 点击「优化」（或「根据诊断结果优化」）→ 右栏新增版本 tab
+4. 可再次点击「优化」生成更多版本
+5. 使用「对比」查看任一版本与当前输入的差异
+6. 点击「采纳」将满意的版本回填到左栏
+7. 从第 2 步重复，继续打磨
 
 ---
 
-## API Contract
+## 接口契约
 
-Frontend calls backend REST endpoints. Backend implementation is out of scope for V1 frontend spec. Authentication via `Authorization: Bearer <token>` header on all API requests.
+前端调用后端 REST 接口。后端实现不在 V1 前端规格范围内。所有 API 请求通过 `Authorization: Bearer <token>` 请求头进行认证。
 
-### Login
+### 登录
 
-```
+```json
 POST /api/login
-Request:  { "username": "string", "password": "string" }
-Response: { "token": "string", "expiresIn": "number (seconds)" }
-Error:    { "error": "string" }  (HTTP 401)
+请求体：{ "username": "string", "password": "string" }
+响应体：{ "token": "string", "expiresIn": "number (秒)" }
+错误：  { "error": "string" }  (HTTP 401)
 ```
 
-- On login failure, display error message below the login form.
-- On token expiry, redirect to login page.
-- No "remember me" option in V1.
+- 登录失败时，在登录表单下方显示错误信息。
+- Token 过期时，自动跳转到登录页。
+- V1 不提供「记住我」选项。
 
-### Model List
+### 模型列表
 
-```
+```json
 GET /api/models
-Response:
+响应体：
 [
   { "name": "Claude", "identifier": "claude", "available": true },
   { "name": "GPT", "identifier": "gpt", "available": false }
 ]
 ```
 
-### Prompt Processing
+### 提示词处理
 
-```
+```json
 POST /api/process
-Request:
+请求体：
 {
   "prompt": "string",
-  "model": "string (model identifier)",
+  "model": "string (模型标识符)",
   "action": "diagnose | optimize",
-  "diagnosis": "string? (only sent by 'Optimize based on diagnosis' button)"
+  "diagnosis": "string? (仅「根据诊断结果优化」按钮发送)"
 }
 ```
 
-**Streaming protocol:** Server-Sent Events (SSE).
+**流式协议：** Server-Sent Events (SSE)。
 
-**Diagnose response** (streamed as JSON chunks):
+**诊断响应**（以 JSON 块流式返回）：
 
 ```json
 {
@@ -200,67 +199,67 @@ Request:
 }
 ```
 
-**Optimize response** (streamed as text chunks):
+**优化响应**（以文本块流式返回）：
 
-```
-Plain text of the optimized prompt, streamed incrementally.
+```text
+优化后的提示词纯文本，逐步流式输出。
 ```
 
-**Error response** (HTTP 4xx/5xx):
+**错误响应**（HTTP 4xx/5xx）：
 
 ```json
-{ "error": "string (human-readable error message)" }
+{ "error": "string (人类可读的错误信息)" }
 ```
 
-### Request Behavior
+### 请求行为
 
-- **Loading state**: Clicked button shows spinner, both Diagnose and Optimize buttons disabled during request.
-- **Streaming**: Right panel renders content in real-time as it arrives.
-- **Cancel**: A "Cancel" button replaces the spinner on the active button. Clicking it aborts the SSE connection. Partial content received so far is **kept** in the tab.
-- **Concurrent requests**: Only one request at a time. Both buttons disabled until current request completes or is cancelled.
-- **Error handling**: Error message displayed as a toast notification at top-right of the workbench.
-
----
-
-## Visual Design
-
-### Theme System
-
-Two modes: Light and Dark. User preference stored in `localStorage`. Default is **light mode** on first visit.
-
-| Token | Light Mode | Dark Mode |
-|-------|-----------|-----------|
-| Page background | `#FDFDFD` (off-white) | `#090B0B` (near-black) |
-| Surface (editor, cards) | `#FFFFFF` (white) | `#171717` (gray-900) |
-| Primary text | `#0E0E0E` (deep black) | `#F3F3F3` (gray-50) |
-| Accent color | `#D4A27F` (warm orange) | `#D4A27F` (warm orange) |
-| Borders / dividers | gray-200 | gray-700 |
-| Secondary text | gray-500 | gray-400 |
-
-- Accent color `#D4A27F` consistent across both modes (brand color)
-- Gray scale inverted between modes: light uses gray-50~400, dark uses gray-600~950
-
-### Typography
-
-- Editor: monospace font
-- UI text: system sans-serif font stack
-
-### Components
-
-- Buttons: accent color fill for primary actions, outlined for secondary
-- Tabs: accent color underline for active tab
-- Cards (diagnosis): subtle border, surface background color
-- Diff view: red/green background highlights with sufficient contrast in both themes
+- **加载状态**：被点击的按钮显示 loading 动画，诊断和优化按钮在请求期间均禁用。
+- **流式输出**：右栏实时渲染到达的内容。
+- **取消**：loading 动画旁显示「取消」按钮，点击后中断 SSE 连接。已接收的部分内容 **保留** 在 tab 中。
+- **并发请求**：同一时间只允许一个请求。两个按钮在当前请求完成或取消前保持禁用。
+- **错误处理**：错误信息以 toast 通知形式显示在工作台右上角。
 
 ---
 
-## Out of Scope (V1)
+## 视觉设计
 
-- History / saved prompts
-- Mobile responsive design
-- Internationalization (i18n)
-- Dark/light auto-detection based on system preference
-- User registration / multi-user
-- Backend implementation details
-- Accessibility (ARIA labels, screen reader support)
-- Keyboard shortcuts beyond basic text editing
+### 主题系统
+
+两种模式：亮色和暗色。用户偏好存储在 `localStorage`。首次访问默认为 **亮色模式**。
+
+| 设计令牌 | 亮色模式 | 暗色模式 |
+|---------|---------|---------|
+| 页面背景 | `#FDFDFD`（米白） | `#090B0B`（近黑） |
+| 表面色（编辑器、卡片） | `#FFFFFF`（白） | `#171717`（gray-900） |
+| 主要文字 | `#0E0E0E`（深黑） | `#F3F3F3`（gray-50） |
+| 强调色 | `#D4A27F`（暖橙） | `#D4A27F`（暖橙） |
+| 边框 / 分割线 | gray-200 | gray-700 |
+| 次要文字 | gray-500 | gray-400 |
+
+- 强调色 `#D4A27F` 在两种模式下保持一致（品牌色）
+- 灰色梯度两种模式下反向使用：亮色用 gray-50~400，暗色用 gray-600~950
+
+### 字体
+
+- 编辑器：等宽字体
+- UI 文字：系统无衬线字体栈
+
+### 组件
+
+- 按钮：主要操作用强调色填充，次要操作用描边样式
+- Tab：活跃 tab 使用强调色下划线
+- 卡片（诊断）：细边框，表面色背景
+- Diff 视图：红/绿背景高亮，确保在两种主题下对比度充足
+
+---
+
+## V1 范围外
+
+- 历史记录 / 提示词存档
+- 移动端响应式适配
+- 国际化（i18n）
+- 基于系统偏好自动切换亮/暗色
+- 用户注册 / 多用户
+- 后端实现细节
+- 无障碍访问（ARIA 标签、屏幕阅读器支持）
+- 超出基本文本编辑的键盘快捷键
