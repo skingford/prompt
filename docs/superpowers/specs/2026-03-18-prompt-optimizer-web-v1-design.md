@@ -76,6 +76,11 @@ Two buttons below the editor, horizontally aligned:
 | **Diagnose** | Analyze prompt issues | Sends prompt to backend, results appear in right panel "Diagnose" tab |
 | **Optimize** | Generate optimized version | Sends prompt to backend, adds new version tab in right panel |
 
+### Input Validation
+
+- Both buttons are **disabled** when the editor is empty (whitespace-only counts as empty).
+- No character limit enforced in V1.
+
 ---
 
 ## Right Panel - Results Area
@@ -89,7 +94,9 @@ Dynamically generated tabs:
 ```
 
 - **Diagnose tab**: Appears after first diagnosis. Fixed at leftmost position. Cannot be closed. Re-diagnosis overwrites content.
-- **Version tabs**: New tab added per optimization. Sequentially numbered. Closeable via "x" on tab.
+- **Version tabs**: New tab added per optimization. Sequentially numbered. Closeable via "x" on tab. Maximum **10 version tabs** open at once; exceeding this shows a prompt to close old tabs.
+- **Initial state** (before any action): Right panel shows a centered placeholder message, e.g., "Enter a prompt and click Diagnose or Optimize to get started."
+- **Re-diagnosis**: Existing version tabs are **kept** — they remain useful as reference even if the diagnosis context has changed.
 
 ### Diagnose Tab Content
 
@@ -99,7 +106,7 @@ Card list layout, each card contains:
 - **Issue description** - Pinpoints the specific problem
 - **Improvement suggestion** - Concrete direction for fix
 
-Bottom action: **"Optimize based on diagnosis"** button - generates an optimized version informed by the diagnosis results.
+Bottom action: **"Optimize based on diagnosis"** button - generates an optimized version informed by the diagnosis results. This is the **only** path that sends the `diagnosis` field to the backend. The left panel "Optimize" button always sends a plain optimization request without diagnosis context.
 
 ### Version Tab Content
 
@@ -116,9 +123,11 @@ Bottom action: **"Optimize based on diagnosis"** button - generates an optimized
 
 Activated by clicking "Compare" on a version tab:
 
+- **Granularity**: Word-level diff, computed client-side
+- **Layout**: Inline unified view, replaces the version tab content area
 - Red background = deleted content
 - Green background = added content
-- "Exit Compare" button to return to normal view
+- "Exit Compare" button at top to return to normal view
 
 ---
 
@@ -136,47 +145,80 @@ Activated by clicking "Compare" on a version tab:
 
 ## API Contract
 
-Frontend calls a single backend endpoint. Backend implementation is out of scope for V1 frontend spec.
+Frontend calls backend REST endpoints. Backend implementation is out of scope for V1 frontend spec. Authentication via `Authorization: Bearer <token>` header on all API requests.
 
-### Request
+### Login
 
-```json
+```
+POST /api/login
+Request:  { "username": "string", "password": "string" }
+Response: { "token": "string", "expiresIn": "number (seconds)" }
+Error:    { "error": "string" }  (HTTP 401)
+```
+
+- On login failure, display error message below the login form.
+- On token expiry, redirect to login page.
+- No "remember me" option in V1.
+
+### Model List
+
+```
+GET /api/models
+Response:
+[
+  { "name": "Claude", "identifier": "claude", "available": true },
+  { "name": "GPT", "identifier": "gpt", "available": false }
+]
+```
+
+### Prompt Processing
+
+```
+POST /api/process
+Request:
 {
-  "prompt": "string - the prompt text",
-  "model": "string - model identifier from enum list",
+  "prompt": "string",
+  "model": "string (model identifier)",
   "action": "diagnose | optimize",
-  "diagnosis": "string? - optional, diagnosis result for diagnosis-informed optimization"
+  "diagnosis": "string? (only sent by 'Optimize based on diagnosis' button)"
 }
 ```
 
-### Response
+**Streaming protocol:** Server-Sent Events (SSE).
 
-Streamed response. Frontend handles:
-
-- **Loading state**: Button shows spinner, disables re-click
-- **Streaming**: Right panel renders content in real-time as it arrives
-- **Cancel**: User can abort in-progress generation
-- **Error handling**: Display error message in right panel (API key invalid, model unavailable, network error)
-
-### Model List Endpoint
+**Diagnose response** (streamed as JSON chunks):
 
 ```json
-GET /api/models
-
-Response:
-[
-  {
-    "name": "Claude",
-    "identifier": "claude",
-    "available": true
-  },
-  {
-    "name": "GPT",
-    "identifier": "gpt",
-    "available": false
-  }
-]
+{
+  "issues": [
+    {
+      "type": "vague | missing | contradictory | redundant",
+      "description": "string",
+      "suggestion": "string"
+    }
+  ]
+}
 ```
+
+**Optimize response** (streamed as text chunks):
+
+```
+Plain text of the optimized prompt, streamed incrementally.
+```
+
+**Error response** (HTTP 4xx/5xx):
+
+```json
+{ "error": "string (human-readable error message)" }
+```
+
+### Request Behavior
+
+- **Loading state**: Clicked button shows spinner, both Diagnose and Optimize buttons disabled during request.
+- **Streaming**: Right panel renders content in real-time as it arrives.
+- **Cancel**: A "Cancel" button replaces the spinner on the active button. Clicking it aborts the SSE connection. Partial content received so far is **kept** in the tab.
+- **Concurrent requests**: Only one request at a time. Both buttons disabled until current request completes or is cancelled.
+- **Error handling**: Error message displayed as a toast notification at top-right of the workbench.
 
 ---
 
@@ -184,7 +226,7 @@ Response:
 
 ### Theme System
 
-Two modes: Light and Dark. User preference stored in `localStorage`.
+Two modes: Light and Dark. User preference stored in `localStorage`. Default is **light mode** on first visit.
 
 | Token | Light Mode | Dark Mode |
 |-------|-----------|-----------|
@@ -220,3 +262,5 @@ Two modes: Light and Dark. User preference stored in `localStorage`.
 - Dark/light auto-detection based on system preference
 - User registration / multi-user
 - Backend implementation details
+- Accessibility (ARIA labels, screen reader support)
+- Keyboard shortcuts beyond basic text editing
