@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Prompt Optimization Tool - Version Comparison</title>
+<!-- BEGIN: External Scripts -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            neonmint: {
+              DEFAULT: '#00FFD1',
+              50: '#f0fffb',
+              100: '#ccfff6',
+              200: '#99ffee',
+              300: '#66ffe5',
+              400: '#33ffdd',
+              500: '#00FFD1',
+              600: '#00e6bc',
+              700: '#00bfa1',
+            },
+            mint: {
+              50: '#f0fdfa',
+              100: '#ccfbf1',
+              500: '#14b8a6',
+              600: '#0d9488',
+            },
+            rose: {
+              600: '#e11d48',
+            },
+            slate: {
+              50: '#f8fafc',
+              100: '#f1f5f9',
+              200: '#e2e8f0',
+              300: '#cbd5e1',
+              400: '#94a3b8',
+              500: '#64748b',
+              600: '#475569',
+              700: '#334155',
+              800: '#1e293b',
+              900: '#0f172a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+<!-- END: External Scripts -->
+<style data-purpose="custom-typography">
+    .font-mono-custom {
+      font-family: 'ui-monospace', SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    .diff-deleted {
+      background-color: #fee2e2; /* light red */
+      text-decoration: line-through;
+      color: #991b1b;
+    }
+    .diff-added {
+      background-color: #dcfce7; /* light green */
+      color: #166534;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+<!-- BEGIN: MainHeader -->
+<header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 sticky top-0 z-50" data-purpose="top-bar">
+<div class="flex items-center gap-4">
+<div class="bg-neonmint p-2 rounded-lg">
+<svg class="h-6 w-6 text-slate-900" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<h1 class="text-xl font-bold text-slate-800">PromptOpt <span class="text-slate-400 font-normal">| Workbench</span></h1>
+</div>
+<div class="flex items-center gap-4">
+<nav class="flex items-center space-x-1 bg-slate-100 p-1 rounded-md">
+<button class="px-3 py-1.5 text-sm font-medium text-slate-600 rounded hover:bg-white hover:shadow-sm transition-all">Project</button>
+<button class="px-3 py-1.5 text-sm font-medium text-slate-900 bg-white shadow-sm rounded">Workbench</button>
+<button class="px-3 py-1.5 text-sm font-medium text-slate-600 rounded hover:bg-white hover:shadow-sm transition-all">History</button>
+</nav>
+<div class="h-8 w-8 bg-slate-200 rounded-full border border-slate-300 flex items-center justify-center text-slate-500 font-bold text-xs">JD</div>
+</div>
+</header>
+<!-- END: MainHeader -->
+<!-- BEGIN: WorkbenchContent -->
+<main class="flex-grow flex overflow-hidden">
+<!-- Left Column: Current Prompt Editor -->
+<section class="w-1/2 flex flex-col border-r border-slate-200 bg-white" data-purpose="prompt-editor">
+<div class="p-4 border-b border-slate-100 flex justify-between items-center">
+<h2 class="text-sm font-semibold text-slate-600 uppercase tracking-wider">Current Prompt</h2>
+<span class="text-xs text-slate-400">Characters: 412</span>
+</div>
+<div class="flex-grow p-6">
+<textarea class="w-full h-full p-4 font-mono-custom text-sm border border-slate-200 rounded-lg focus:ring-neonmint focus:border-neonmint resize-none text-slate-700 leading-relaxed outline-none transition-shadow" data-purpose="source-editor" placeholder="Enter your current prompt here...">Act as a helpful travel agent. I want to plan a 5-day trip to Tokyo in October. Provide a detailed itinerary focusing on sushi and historical shrines. Include estimated costs for each day and advice on using the JR pass. Ensure the tone is professional yet welcoming. I also need suggestions for hotels in Shinjuku area.</textarea>
+</div>
+</section>
+<!-- Right Column: Version Comparison / Diff View -->
+<section class="w-1/2 flex flex-col bg-slate-50" data-purpose="comparison-view">
+<!-- BEGIN: ComparisonHeader -->
+<div class="p-4 border-b border-slate-200 bg-white flex justify-between items-center">
+<div class="flex gap-2">
+<button class="px-4 py-2 text-sm font-bold text-slate-900 bg-neonmint/10 rounded-t-lg border-b-2 border-neonmint">Version 1</button>
+<button class="px-4 py-2 text-sm font-medium text-slate-400 hover:text-slate-600">Version 2</button>
+</div>
+<button class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 border border-slate-300 rounded hover:bg-slate-50 transition-colors">
+<svg class="h-4 w-4" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+          Exit Comparison
+        </button>
+</div>
+<!-- END: ComparisonHeader -->
+<!-- BEGIN: DiffContent -->
+<div class="flex-grow p-6 overflow-auto">
+<div class="bg-white border border-slate-200 rounded-lg shadow-sm min-h-full p-6 font-mono-custom text-sm leading-relaxed text-slate-800" data-purpose="diff-display">
+<p>
+            Act as a <span class="diff-deleted">helpful travel agent</span><span class="diff-added">specialized Tokyo travel consultant</span>. 
+            I want to plan a <span class="diff-deleted">5-day trip</span><span class="diff-added">comprehensive 5-day itinerary</span> for Tokyo in <span class="diff-deleted">October</span><span class="diff-added">late October (Autumn foliage peak)</span>.
+          </p>
+<br/>
+<p>
+            Provide a detailed itinerary focusing on <span class="diff-deleted">sushi and historical shrines</span><span class="diff-added">authentic Edomae-style sushi experiences and significant Shinto shrines</span>. 
+            Include estimated costs for each day and <span class="diff-deleted">advice on using the JR pass</span><span class="diff-added">a cost-benefit analysis of the JR Pass vs. Suica cards</span>.
+          </p>
+<br/>
+<p>
+            Ensure the tone is professional yet <span class="diff-deleted">welcoming</span><span class="diff-added">enthusiastic</span>. 
+            I also need <span class="diff-added">luxury and boutique</span> hotel suggestions <span class="diff-deleted">in Shinjuku area</span><span class="diff-added">specifically within the Shinjuku and Shibuya districts</span>.
+          </p>
+</div>
+</div>
+<!-- END: DiffContent -->
+<!-- BEGIN: ActionButtons -->
+<div class="p-6 border-t border-slate-200 bg-white flex items-center justify-between">
+<div class="flex gap-3">
+<button class="px-8 py-2.5 bg-neonmint text-slate-900 font-bold rounded-lg hover:bg-neonmint-600 transition-colors shadow-sm" data-purpose="btn-adopt">
+            Adopt
+          </button>
+<button class="px-6 py-2.5 border border-slate-300 text-slate-600 font-medium rounded-lg hover:bg-slate-50 transition-colors" data-purpose="btn-copy">
+            Copy
+          </button>
+</div>
+<div class="flex bg-slate-100 p-1 rounded-lg">
+<button class="px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700">Preview</button>
+<button class="px-4 py-2 text-sm font-bold bg-white text-slate-900 shadow-sm rounded-md border-b border-neonmint">Compare</button>
+</div>
+</div>
+<!-- END: ActionButtons -->
+</section>
+</main>
+<!-- END: WorkbenchContent -->
+<!-- BEGIN: Footer -->
+<footer class="h-10 bg-slate-800 text-slate-400 text-xs flex items-center justify-between px-6">
+<div>Prompt Optimization Tool v2.4.1</div>
+<div class="flex gap-4">
+<span>Ready</span>
+<span class="flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-neonmint shadow-[0_0_8px_rgba(0,255,209,0.5)]"></span> System Online</span>
+</div>
+</footer>
+<!-- END: Footer -->
+</body></html>

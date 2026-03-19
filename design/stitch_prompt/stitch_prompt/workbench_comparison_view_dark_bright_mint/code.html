@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Prompt Optimization Tool - Version Comparison</title>
+<!-- BEGIN: External Scripts -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Space Grotesk"', 'ui-sans-serif', 'system-ui'],
+          },
+          colors: {
+            mint: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              400: '#4ade80',
+              500: '#22c55e',
+              600: '#16a34a',
+            },
+            rose: {
+              400: '#fb7185',
+              600: '#e11d48',
+              700: '#be123c',
+            },
+            slate: {
+              50: '#f8fafc',
+              100: '#f1f5f9',
+              200: '#e2e8f0',
+              300: '#cbd5e1',
+              400: '#94a3b8',
+              500: '#64748b',
+              600: '#475569',
+              700: '#334155',
+              800: '#1e293b',
+              900: '#0f172a',
+              950: '#020617', 
+            }
+          },
+          borderRadius: {
+            'lg': '8px',
+            'md': '6px',
+            'sm': '4px',
+          }
+        }
+      }
+    }
+  </script>
+<!-- END: External Scripts -->
+<style data-purpose="custom-typography">
+    .font-mono-custom {
+      font-family: 'ui-monospace', SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    .diff-deleted {
+      background-color: rgba(153, 27, 27, 0.4); /* dark red semi-transparent */
+      text-decoration: line-through;
+      color: #fecaca; /* light red text */
+      padding: 0 2px;
+      border-radius: 2px;
+    }
+    .diff-added {
+      background-color: rgba(22, 101, 52, 0.4); /* dark green semi-transparent */
+      color: #bbf7d0; /* light green text */
+      padding: 0 2px;
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
+<!-- BEGIN: MainHeader -->
+<header class="bg-slate-800 border-b border-slate-700 h-16 flex items-center justify-between px-6 sticky top-0 z-50" data-purpose="top-bar">
+<div class="flex items-center gap-4">
+<div class="bg-mint-400 p-2 rounded-lg">
+<svg class="h-6 w-6 text-slate-900" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<h1 class="text-xl font-bold text-slate-100">PromptOpt <span class="text-slate-500 font-normal">| Workbench</span></h1>
+</div>
+<div class="flex items-center gap-4">
+<nav class="flex items-center space-x-1 bg-slate-900/50 p-1 rounded-md">
+<button class="px-3 py-1.5 text-sm font-medium text-slate-400 rounded hover:text-slate-200 transition-all">Project</button>
+<button class="px-3 py-1.5 text-sm font-medium text-slate-100 bg-slate-700 shadow-sm rounded">Workbench</button>
+<button class="px-3 py-1.5 text-sm font-medium text-slate-400 rounded hover:text-slate-200 transition-all">History</button>
+</nav>
+<div class="h-8 w-8 bg-slate-700 rounded-full border border-slate-600 flex items-center justify-center text-slate-300 font-bold text-xs">JD</div>
+</div>
+</header>
+<!-- END: MainHeader -->
+<!-- BEGIN: WorkbenchContent -->
+<main class="flex-grow flex overflow-hidden">
+<!-- Left Column: Current Prompt Editor -->
+<section class="w-1/2 flex flex-col border-r border-slate-700 bg-slate-800" data-purpose="prompt-editor">
+<div class="p-4 border-b border-slate-700 flex justify-between items-center">
+<h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Current Prompt</h2>
+<span class="text-xs text-slate-500">Characters: 412</span>
+</div>
+<div class="flex-grow p-6">
+<textarea class="w-full h-full p-4 font-mono-custom text-sm bg-slate-900 border border-slate-700 rounded-lg focus:ring-mint-400 focus:border-mint-400 resize-none text-slate-300 leading-relaxed outline-none" data-purpose="source-editor" placeholder="Enter your current prompt here...">Act as a helpful travel agent. I want to plan a 5-day trip to Tokyo in October. Provide a detailed itinerary focusing on sushi and historical shrines. Include estimated costs for each day and advice on using the JR pass. Ensure the tone is professional yet welcoming. I also need suggestions for hotels in Shinjuku area.</textarea>
+</div>
+</section>
+<!-- Right Column: Version Comparison / Diff View -->
+<section class="w-1/2 flex flex-col bg-slate-900" data-purpose="comparison-view">
+<!-- BEGIN: ComparisonHeader -->
+<div class="p-4 border-b border-slate-700 bg-slate-800 flex justify-between items-center">
+<div class="flex gap-2">
+<button class="px-4 py-2 text-sm font-medium text-mint-400 border-b-2 border-mint-400">Version 1</button>
+<button class="px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-300 transition-colors">Version 2</button>
+</div>
+<button class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-400 border border-slate-700 rounded hover:bg-slate-700 transition-colors">
+<svg class="h-4 w-4" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+        Exit Comparison
+      </button>
+</div>
+<!-- END: ComparisonHeader -->
+<!-- BEGIN: DiffContent -->
+<div class="flex-grow p-6 overflow-auto">
+<div class="bg-slate-800 border border-slate-700 rounded-lg shadow-sm min-h-full p-6 font-mono-custom text-sm leading-relaxed text-slate-300" data-purpose="diff-display">
+<p>
+          Act as a <span class="diff-deleted">helpful travel agent</span><span class="diff-added">specialized Tokyo travel consultant</span>. 
+          I want to plan a <span class="diff-deleted">5-day trip</span><span class="diff-added">comprehensive 5-day itinerary</span> for Tokyo in <span class="diff-deleted">October</span><span class="diff-added">late October (Autumn foliage peak)</span>.
+        </p>
+<br/>
+<p>
+          Provide a detailed itinerary focusing on <span class="diff-deleted">sushi and historical shrines</span><span class="diff-added">authentic Edomae-style sushi experiences and significant Shinto shrines</span>. 
+          Include estimated costs for each day and <span class="diff-deleted">advice on using the JR pass</span><span class="diff-added">a cost-benefit analysis of the JR Pass vs. Suica cards</span>.
+        </p>
+<br/>
+<p>
+          Ensure the tone is professional yet <span class="diff-deleted">welcoming</span><span class="diff-added">enthusiastic</span>. 
+          I also need <span class="diff-added">luxury and boutique</span> hotel suggestions <span class="diff-deleted">in Shinjuku area</span><span class="diff-added">specifically within the Shinjuku and Shibuya districts</span>.
+        </p>
+</div>
+</div>
+<!-- END: DiffContent -->
+<!-- BEGIN: ActionButtons -->
+<div class="p-6 border-t border-slate-700 bg-slate-800 flex items-center justify-between">
+<div class="flex gap-3">
+<button class="px-6 py-2 bg-rose-400 text-slate-900 font-bold rounded-lg hover:bg-rose-300 transition-colors shadow-lg" data-purpose="btn-adopt">
+          Adopt
+        </button>
+<button class="px-6 py-2 border border-slate-700 text-slate-300 font-medium rounded-lg hover:bg-slate-700 transition-colors" data-purpose="btn-copy">
+          Copy
+        </button>
+</div>
+<div class="flex bg-slate-900 p-1 rounded-lg">
+<button class="px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-300 transition-colors">Preview</button>
+<button class="px-4 py-2 text-sm font-medium bg-slate-700 text-mint-400 shadow-sm rounded-md">Compare</button>
+</div>
+</div>
+<!-- END: ActionButtons -->
+</section>
+</main>
+<!-- END: WorkbenchContent -->
+<!-- BEGIN: Footer -->
+<footer class="h-10 bg-slate-950 text-slate-500 text-xs flex items-center justify-between px-6 border-t border-slate-800">
+<div>Prompt Optimization Tool v2.4.1</div>
+<div class="flex gap-4">
+<span>Ready</span>
+<span class="flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-mint-400"></span> System Online</span>
+</div>
+</footer>
+<!-- END: Footer -->
+</body></html>

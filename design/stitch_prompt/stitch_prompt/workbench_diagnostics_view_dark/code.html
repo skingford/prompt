@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Prompt Optimization Tool - Workbench</title>
+<!-- Tailwind CSS v3 with Forms and Container Queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Space Grotesk for UI, JetBrains Mono for editor -->
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=JetBrains+Mono&amp;display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Space Grotesk', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            mint: {
+              DEFAULT: '#2DD4BF',
+              50: '#F0FDFA',
+              100: '#CCFBF1',
+              600: '#2DD4BF',
+              700: '#14B8A6',
+              900: '#134E4A',
+            },
+            rose: {
+              DEFAULT: '#FB7185',
+              600: '#FB7185',
+              700: '#F43F5E',
+            },
+            slate: {
+              50: '#0F172A',
+              100: '#1E293B',
+              200: '#334155',
+              300: '#475569',
+              400: '#94A3B8',
+              500: '#64748B',
+              600: '#475569',
+              700: '#334155',
+              800: '#1E293B',
+              900: '#F1F5F9',
+            }
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-layout">
+    /* Custom height for the main content area to fill screen excluding header */
+    .main-viewport {
+      height: calc(100vh - 64px);
+    }
+    /* Custom scrollbar for better aesthetics */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0F172A;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-900 overflow-hidden">
+<!-- BEGIN: MainHeader -->
+<header class="h-16 bg-slate-100 border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-50">
+<div class="flex items-center gap-8">
+<!-- Logo Area -->
+<div class="flex items-center gap-2" data-purpose="logo">
+<div class="w-8 h-8 bg-mint rounded flex items-center justify-center text-slate-50 font-bold">P</div>
+<span class="font-bold text-lg tracking-tight text-slate-900">PromptOpt</span>
+</div>
+<!-- Model Selector -->
+<div class="relative" data-purpose="model-selector">
+<select class="appearance-none bg-slate-200 border border-slate-200 rounded-md py-1.5 pl-3 pr-8 text-sm font-medium text-slate-900 focus:ring-mint focus:border-mint cursor-pointer">
+<option selected="">Claude</option>
+<option>GPT-4</option>
+<option>Llama 3</option>
+<option>Gemini Pro</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+<svg class="h-4 w-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+</div>
+</div>
+<!-- User & Controls -->
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-400 hover:bg-slate-200 rounded-full transition-colors" title="Toggle Theme">
+<!-- Sun Icon -->
+<svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.344l-.707.707M12 8a4 4 0 100 8 4 4 0 000-8z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<div class="h-8 w-8 rounded-full bg-slate-200 border border-slate-200 flex items-center justify-center overflow-hidden" data-purpose="user-avatar">
+<img alt="User Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1xVpXv9boWPxaqEx4aJFIX82VY_5BcuipDGwAW6RbwZFgRr0WGH4JIJbBVJOwvAG8t2xTyLNWtxxuXuyiS7QM3ZgOIIinD02Gz4ApUHTZFNmuhc_sbUO6TLAmAR-ibOcWmCc-112hLAGtKAmErMj4OW32Mi81yEYQ62sRN8ssyJg7-JKF4Rcje8-0PYEasG6T8h4gzSCRL6K226RNteJJiEUn3tvSxR3TeXnMNAE3FCroy4nuKnQxyeH4IlaRA9LhWdRiCNNBSTfW"/>
+</div>
+</div>
+</header>
+<!-- END: MainHeader -->
+<!-- BEGIN: MainWorkbench -->
+<main class="main-viewport flex overflow-hidden">
+<!-- BEGIN: LeftColumn (Editor) -->
+<section class="w-[40%] flex flex-col border-r border-slate-200 bg-slate-100" data-purpose="prompt-editor-pane">
+<div class="p-4 border-b border-slate-200 flex justify-between items-center">
+<h2 class="font-semibold text-slate-900">Prompt Editor</h2>
+<span class="text-xs text-slate-400 font-medium">124 characters</span>
+</div>
+<!-- Editor Textarea -->
+<div class="flex-grow p-4 overflow-hidden">
+<textarea class="w-full h-full resize-none border-0 bg-transparent focus:ring-0 font-mono text-sm leading-relaxed text-slate-400 placeholder-slate-500" id="prompt-input" placeholder="Enter your prompt here...">Act as an expert analyst and review this document. Tell me what is wrong with it and how to fix the structure so it is more professional for a stakeholder presentation next week.</textarea>
+</div>
+<!-- Action Footer -->
+<div class="p-4 border-t border-slate-200 flex gap-3">
+<button class="flex-1 py-2 px-4 border border-slate-200 text-slate-900 rounded-lg font-medium hover:bg-slate-200 transition-colors">
+          Diagnose
+        </button>
+<button class="flex-1 py-2 px-4 bg-mint text-slate-50 rounded-lg font-medium hover:bg-mint-700 transition-colors shadow-sm">
+          Optimize
+        </button>
+</div>
+</section>
+<!-- END: LeftColumn -->
+<!-- BEGIN: RightColumn (Diagnostics & Results) -->
+<section class="w-[60%] flex flex-col bg-slate-50" data-purpose="analysis-pane">
+<!-- Tabs Navigation -->
+<div class="flex border-b border-slate-200 bg-slate-100 px-4">
+<button class="px-6 py-4 text-sm font-semibold border-b-2 border-mint text-mint">
+          Diagnostics
+        </button>
+<button class="px-6 py-4 text-sm font-medium text-slate-400 hover:text-slate-900 border-b-2 border-transparent">
+          Version 1
+        </button>
+<button class="px-6 py-4 text-sm font-medium text-slate-400 hover:text-slate-900 border-b-2 border-transparent">
+          Version 2
+        </button>
+</div>
+<!-- Tab Content: Diagnostics -->
+<div class="flex-grow overflow-y-auto p-6 space-y-4" data-purpose="diagnostics-list">
+<!-- Diagnostic Card 1 -->
+<div class="bg-slate-100 p-4 rounded-lg border border-slate-200 shadow-sm" data-purpose="diagnostic-card">
+<div class="flex items-center gap-2 mb-2">
+<span class="px-2 py-0.5 bg-mint/10 text-mint text-[10px] font-bold uppercase rounded tracking-wider border border-mint/20">Vague</span>
+<h3 class="font-semibold text-slate-900 text-sm">Target Audience Definition</h3>
+</div>
+<p class="text-sm text-slate-400 mb-3">The prompt mentions "stakeholder presentation" but doesn't specify the level of technical knowledge or specific interests of these stakeholders.</p>
+<div class="bg-slate-50 p-3 rounded-lg border-l-4 border-mint">
+<p class="text-xs font-medium text-slate-500 mb-1 uppercase tracking-wide">Suggestion</p>
+<p class="text-sm text-slate-900 italic">"Explicitly state if the stakeholders are C-suite executives, technical leads, or general management."</p>
+</div>
+</div>
+<!-- Diagnostic Card 2 -->
+<div class="bg-slate-100 p-4 rounded-lg border border-slate-200 shadow-sm" data-purpose="diagnostic-card">
+<div class="flex items-center gap-2 mb-2">
+<span class="px-2 py-0.5 bg-mint/10 text-mint text-[10px] font-bold uppercase rounded tracking-wider border border-mint/20">Unclear</span>
+<h3 class="font-semibold text-slate-900 text-sm">Scope of "Review"</h3>
+</div>
+<p class="text-sm text-slate-400 mb-3">"Tell me what is wrong" is a broad directive. The AI might focus on grammar when you need strategy, or vice versa.</p>
+<div class="bg-slate-50 p-3 rounded-lg border-l-4 border-mint">
+<p class="text-xs font-medium text-slate-500 mb-1 uppercase tracking-wide">Suggestion</p>
+<p class="text-sm text-slate-900 italic">"Specify dimensions for review: logical flow, data accuracy, or visual layout."</p>
+</div>
+</div>
+<!-- Diagnostic Card 3 -->
+<div class="bg-slate-100 p-4 rounded-lg border border-slate-200 shadow-sm" data-purpose="diagnostic-card">
+<div class="flex items-center gap-2 mb-2">
+<span class="px-2 py-0.5 bg-mint/10 text-mint text-[10px] font-bold uppercase rounded tracking-wider border border-mint/20">Optimization</span>
+<h3 class="font-semibold text-slate-900 text-sm">Constraint Specification</h3>
+</div>
+<p class="text-sm text-slate-400 mb-3">The time constraint "next week" is irrelevant to the model but implies urgency that could be better handled by formatting requests.</p>
+<div class="bg-slate-50 p-3 rounded-lg border-l-4 border-mint">
+<p class="text-xs font-medium text-slate-500 mb-1 uppercase tracking-wide">Suggestion</p>
+<p class="text-sm text-slate-900 italic">"Request the output in a checklist format or a structured slide-by-slide outline."</p>
+</div>
+</div>
+</div>
+<!-- Action Footer for Analysis Pane -->
+<div class="p-6 border-t border-slate-200 bg-slate-100">
+<button class="w-full py-3 px-6 bg-rose text-slate-50 rounded-lg font-bold text-sm hover:bg-rose-700 transition-colors shadow-md flex items-center justify-center gap-2">
+<svg class="h-4 w-4" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+          Optimize based on diagnostics
+        </button>
+</div>
+</section>
+<!-- END: RightColumn -->
+</main>
+<!-- END: MainWorkbench -->
+</body></html>

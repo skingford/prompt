@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Login | Prompt Optimization Tool</title>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration for Custom Colors -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primaryMint: '#0D9488',
+            bgMint: '#F8FFFE',
+            slateCustom: '#334155',
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom Styles for UI Refinements -->
+<style data-purpose="custom-transitions">
+    .btn-transition {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .input-focus:focus {
+      border-color: #0D9488;
+      box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.2);
+    }
+  </style>
+</head>
+<body class="bg-bgMint min-h-screen flex items-center justify-center font-sans antialiased text-slateCustom">
+<!-- BEGIN: MainContainer -->
+<main class="w-full max-w-md px-6 py-12" data-purpose="login-container">
+<!-- BEGIN: HeaderSection -->
+<header class="text-center mb-10" data-purpose="brand-header">
+<!-- Logo Placeholder -->
+<div class="inline-flex items-center justify-center w-16 h-16 bg-primaryMint rounded-xl mb-4 shadow-lg shadow-teal-100">
+<svg class="h-10 w-10 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<h1 class="text-2xl font-bold tracking-tight text-slate-800">Prompt Optimization Tool</h1>
+<p class="text-slate-500 mt-2">Refine your AI interactions with precision</p>
+</header>
+<!-- END: HeaderSection -->
+<!-- BEGIN: LoginForm -->
+<section class="bg-white p-8 rounded-2xl shadow-xl shadow-slate-100 border border-slate-100" data-purpose="login-form-card">
+<form action="#" class="space-y-6" method="POST">
+<!-- Username Field -->
+<div class="space-y-1">
+<label class="block text-sm font-medium text-slate-700" for="username">Username</label>
+<div class="relative">
+<input class="w-full px-4 py-3 rounded-lg border border-slate-200 input-focus outline-none text-slate-700 placeholder:text-slate-400" id="username" name="username" placeholder="Enter your username" required="" type="text"/>
+</div>
+</div>
+<!-- Password Field -->
+<div class="space-y-1">
+<div class="flex items-center justify-between">
+<label class="block text-sm font-medium text-slate-700" for="password">Password</label>
+<a class="text-xs text-primaryMint hover:underline" href="#">Forgot password?</a>
+</div>
+<div class="relative">
+<input class="w-full px-4 py-3 rounded-lg border border-slate-200 input-focus outline-none text-slate-700 placeholder:text-slate-400" id="password" name="password" placeholder="••••••••" required="" type="password"/>
+</div>
+</div>
+<!-- Login Button -->
+<div class="pt-2">
+<button class="w-full py-3 px-4 bg-primaryMint text-white font-semibold rounded-lg shadow-md hover:bg-teal-700 active:scale-[0.98] btn-transition focus:outline-none focus:ring-2 focus:ring-primaryMint focus:ring-offset-2" type="submit">
+            Login
+          </button>
+</div>
+<!-- Secondary Actions -->
+<div class="mt-6 text-center text-sm text-slate-500">
+          Don't have an account? 
+          <a class="text-primaryMint font-semibold hover:underline" href="#">Sign up for free</a>
+</div>
+</form>
+</section>
+<!-- END: LoginForm -->
+<!-- BEGIN: FooterLinks -->
+<footer class="mt-8 text-center text-xs text-slate-400" data-purpose="legal-footer">
+<div class="flex justify-center space-x-4 mb-2">
+<a class="hover:text-slate-600" href="#">Privacy Policy</a>
+<a class="hover:text-slate-600" href="#">Terms of Service</a>
+<a class="hover:text-slate-600" href="#">Support</a>
+</div>
+<p>© 2023 Prompt Optimization Tool. All rights reserved.</p>
+</footer>
+<!-- END: FooterLinks -->
+</main>
+<!-- END: MainContainer -->
+</body></html>

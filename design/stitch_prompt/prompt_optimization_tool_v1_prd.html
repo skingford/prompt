@@ -1,0 +1,32 @@
+# Prompt Optimization Tool Web V1 - Design Specification
+
+## Overview
+A personal prompt optimization web tool with a workbench layout. Supports iterative optimization including diagnostics, structured rewriting, and version comparison.
+
+## Layout & Navigation
+- **Top Bar**: Logo, Model Selection (dropdown), Theme Toggle (Light/Dark), User Avatar + Logout.
+- **Main Content**: Split-pane layout (~40% left, ~60% right) with a draggable divider.
+
+## Left Column: Input Area
+- **Prompt Editor**: Large text area with monospace font, character count, and Tab indentation support.
+- **Actions**: "Diagnose" (analyzes issues) and "Optimize" (generates new versions). Buttons are disabled if input is empty.
+
+## Right Column: Result Area
+- **Tabbed Interface**:
+    - **Diagnostics Tab**: Fixed, non-closable. Shows a list of issue cards (Type, Description, Suggestion).
+    - **Version Tabs**: Closable, numbered (Version 1, 2, etc.). Max 10 tabs.
+- **Version Content**:
+    - Optimized text area (selectable/copyable).
+    - Actions: **Adopt** (fills left editor), **Copy**, **Compare** (diff mode).
+- **Diff Mode**: Inline view showing character/word-level differences (Red for deletions, Green for additions).
+
+## Visual Identity (Mint & Slate)
+- **Primary Color (Mint)**: `#0D9488` (Light) / `#2DD4BF` (Dark). Used for buttons, tabs, and links.
+- **Accent Color (Rose)**: `#E11D48` (Light) / `#FB7185` (Dark). Used for high-priority actions like "Adopt" and error states.
+- **Backgrounds**: Mint-white/Dark-slate.
+- **Typography**: Monospace for editor; Sans-serif for UI.
+
+## Interactions
+- **Streaming (SSE)**: Results appear in real-time. A "Cancel" button is available during generation.
+- **Loading States**: Buttons show loading animations; concurrent requests are blocked.
+- **Error Handling**: Toast notifications for API errors.
