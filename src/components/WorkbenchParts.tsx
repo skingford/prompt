@@ -45,11 +45,13 @@ export function BrandLockup({
   title = "PromptOpt",
   subtitle,
   mark = "bolt",
+  showDivider = false,
 }: {
   compact?: boolean;
   title?: string;
   subtitle?: string;
   mark?: "bolt" | "letter";
+  showDivider?: boolean;
 }) {
   return (
     <div className={`brand-lockup ${compact ? "is-compact" : ""}`}>
@@ -62,7 +64,12 @@ export function BrandLockup({
       </div>
       <div className="brand-lockup__copy">
         <span className="brand-lockup__title">{title}</span>
-        {subtitle ? <span className="brand-lockup__subtitle">{subtitle}</span> : null}
+        {subtitle ? (
+          <>
+            {showDivider ? <span className="brand-lockup__divider">|</span> : null}
+            <span className="brand-lockup__subtitle">{subtitle}</span>
+          </>
+        ) : null}
       </div>
     </div>
   );
@@ -253,7 +260,7 @@ export function ComparisonTopBar() {
   return (
     <header className="topbar topbar--comparison">
       <div className="topbar__left">
-        <BrandLockup title="PromptOpt" subtitle="Workbench" />
+        <BrandLockup title="PromptOpt" subtitle="Workbench" showDivider />
       </div>
       <div className="topbar__right">
         <nav className="segment-nav" aria-label="Workbench sections">
@@ -556,13 +563,13 @@ export function DiffPanel({
   }
 
   return (
-    <section className="results-shell">
+    <section className="results-shell results-shell--compare">
       <div className="results-scroll results-scroll--compare">
-        <div className="diff-card">
+        <div className="diff-card diff-card--comparison">
           {viewMode === "preview" ? (
             <pre className="version-card__content">{version.content}</pre>
           ) : (
-            <div className="diff-card__content">
+            <div className="diff-card__content diff-card__content--comparison">
               {diffChunks.map((chunk, index) => (
                 <span
                   key={`${chunk.type}-${index}`}
@@ -581,8 +588,8 @@ export function DiffPanel({
           )}
         </div>
       </div>
-      <div className="results-footer results-footer--inline">
-        <div className="button-row">
+      <div className="results-footer results-footer--inline results-footer--compare">
+        <div className="button-row button-row--compare">
           <button type="button" className="button button--accent" onClick={onAdopt}>
             Adopt
           </button>
@@ -591,7 +598,7 @@ export function DiffPanel({
             {copied ? "Copied" : "Copy"}
           </button>
         </div>
-        <div className="toggle-pill">
+        <div className="toggle-pill toggle-pill--compare">
           <button
             type="button"
             className={`toggle-pill__item ${viewMode === "preview" ? "is-active" : ""}`}
