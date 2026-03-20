@@ -10,10 +10,10 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { diffText } from "../lib/diff";
+import { CustomSelect } from "./CustomSelect";
 import {
   BoltIcon,
   CheckIcon,
-  ChevronDownIcon,
   CloseIcon,
   CopyIcon,
   LogoutIcon,
@@ -76,6 +76,7 @@ export function ThemeToggleButton() {
       type="button"
       className="icon-button"
       onClick={toggleTheme}
+      aria-pressed={theme === "dark"}
       aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
       title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
     >
@@ -97,217 +98,112 @@ export function ModelSelect({
   value: string;
   onChange: (value: string) => void;
 }) {
-  const rootRef = useRef<HTMLDivElement | null>(null);
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
-  const [open, setOpen] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(-1);
-  const selectedOption = options.find((option) => option.identifier === value) ?? options[0];
-
-  function findNextEnabledIndex(startIndex: number, direction: 1 | -1) {
-    let index = startIndex;
-    for (let step = 0; step < options.length; step += 1) {
-      index = (index + direction + options.length) % options.length;
-      if (options[index]?.available) {
-        return index;
-      }
-    }
-    return -1;
-  }
-
-  function findBoundaryEnabledIndex(direction: 1 | -1) {
-    const indices = direction === 1
-      ? options.map((_, index) => index)
-      : options.map((_, index) => options.length - 1 - index);
-
-    return indices.find((index) => options[index]?.available) ?? -1;
-  }
-
-  useEffect(() => {
-    function handlePointerDown(event: MouseEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    }
-
-    function handleWindowBlur() {
-      setOpen(false);
-    }
-
-    window.addEventListener("pointerdown", handlePointerDown);
-    window.addEventListener("blur", handleWindowBlur);
-    return () => {
-      window.removeEventListener("pointerdown", handlePointerDown);
-      window.removeEventListener("blur", handleWindowBlur);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    const selectedIndex = options.findIndex(
-      (option) => option.identifier === value && option.available,
-    );
-    setActiveIndex(selectedIndex >= 0 ? selectedIndex : findBoundaryEnabledIndex(1));
-  }, [open, options, value]);
-
-  function handleSelect(option: ModelOption) {
-    if (!option.available) {
-      return;
-    }
-    onChange(option.identifier);
-    setOpen(false);
-    triggerRef.current?.focus();
-  }
-
-  function handleKeyDown(event: React.KeyboardEvent<HTMLButtonElement>) {
-    if (event.key === "Tab") {
-      setOpen(false);
-      return;
-    }
-
-    if (event.key === "Escape") {
-      setOpen(false);
-      return;
-    }
-
-    if (event.key === "ArrowDown") {
-      event.preventDefault();
-      if (!open) {
-        setOpen(true);
-        setActiveIndex(() => {
-          const selectedIndex = options.findIndex(
-            (option) => option.identifier === value && option.available,
-          );
-          return selectedIndex >= 0 ? selectedIndex : findBoundaryEnabledIndex(1);
-        });
-        return;
-      }
-      setActiveIndex((current) =>
-        findNextEnabledIndex(current < 0 ? options.length - 1 : current, 1),
-      );
-      return;
-    }
-
-    if (event.key === "ArrowUp") {
-      event.preventDefault();
-      if (!open) {
-        setOpen(true);
-        setActiveIndex(() => {
-          const selectedIndex = options.findIndex(
-            (option) => option.identifier === value && option.available,
-          );
-          return selectedIndex >= 0 ? selectedIndex : findBoundaryEnabledIndex(-1);
-        });
-        return;
-      }
-      setActiveIndex((current) =>
-        findNextEnabledIndex(current < 0 ? 0 : current, -1),
-      );
-      return;
-    }
-
-    if (event.key === "Home" && open) {
-      event.preventDefault();
-      setActiveIndex(findBoundaryEnabledIndex(1));
-      return;
-    }
-
-    if (event.key === "End" && open) {
-      event.preventDefault();
-      setActiveIndex(findBoundaryEnabledIndex(-1));
-      return;
-    }
-
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      if (!open) {
-        setOpen(true);
-        return;
-      }
-
-      const option = options[activeIndex];
-      if (option?.available) {
-        handleSelect(option);
-      }
-    }
-  }
-
   return (
-    <div className={`custom-select ${open ? "is-open" : ""}`} ref={rootRef}>
-      <button
-        ref={triggerRef}
-        type="button"
-        className="custom-select__trigger"
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        onClick={() => setOpen((current) => !current)}
-        onKeyDown={handleKeyDown}
-      >
-        <span className="custom-select__value">{selectedOption?.name ?? value}</span>
-        <ChevronDownIcon className="custom-select__chevron" />
-      </button>
-
-      {open ? (
-        <div className="custom-select__menu" role="listbox" aria-label="Model selector">
-          {options.map((option, index) => {
-            const selected = option.identifier === value;
-            const disabled = !option.available;
-            const active = index === activeIndex;
-
-            return (
-              <button
-                key={option.identifier}
-                type="button"
-                role="option"
-                aria-selected={selected}
-                disabled={disabled}
-                className={[
-                  "custom-select__option",
-                  selected ? "is-selected" : "",
-                  active ? "is-active" : "",
-                  disabled ? "is-disabled" : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-                onMouseEnter={() => setActiveIndex(index)}
-                onClick={() => handleSelect(option)}
-              >
-                <span className="custom-select__option-copy">
-                  <span className="custom-select__option-label">{option.name}</span>
-                  {!option.available ? (
-                    <span className="custom-select__option-meta">Not configured</span>
-                  ) : null}
-                </span>
-                {selected ? <CheckIcon className="custom-select__option-icon" /> : null}
-              </button>
-            );
-          })}
-        </div>
-      ) : null}
-    </div>
+    <CustomSelect
+      ariaLabel="Model selector"
+      options={options.map((option) => ({
+        label: option.name,
+        value: option.identifier,
+        disabled: !option.available,
+        meta: option.available ? undefined : "Not configured",
+      }))}
+      value={value}
+      onChange={onChange}
+    />
   );
 }
 
 export function UserMenu() {
   const { session, logout } = useAuth();
+  const closeTimerRef = useRef<number | null>(null);
   const [open, setOpen] = useState(false);
+  const [renderMenu, setRenderMenu] = useState(false);
+  const [closing, setClosing] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
+  function clearCloseTimer() {
+    if (closeTimerRef.current !== null) {
+      window.clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+  }
+
+  function openMenu() {
+    clearCloseTimer();
+    setClosing(false);
+    setRenderMenu(true);
+    setOpen(true);
+  }
+
+  function closeMenu() {
+    if (!renderMenu) {
+      setOpen(false);
+      return;
+    }
+
+    setOpen(false);
+    setClosing(true);
+    clearCloseTimer();
+    closeTimerRef.current = window.setTimeout(() => {
+      setClosing(false);
+      setRenderMenu(false);
+      closeTimerRef.current = null;
+    }, 160);
+  }
+
+  useEffect(() => {
+    function handlePointerDown(event: MouseEvent) {
+      if (!menuRef.current?.contains(event.target as Node)) {
+        closeMenu();
+      }
+    }
+
+    function handleWindowBlur() {
+      closeMenu();
+    }
+
+    window.addEventListener("pointerdown", handlePointerDown);
+    window.addEventListener("blur", handleWindowBlur);
+    return () => {
+      clearCloseTimer();
+      window.removeEventListener("pointerdown", handlePointerDown);
+      window.removeEventListener("blur", handleWindowBlur);
+    };
+  }, [renderMenu]);
+
   return (
-    <div className="user-menu" ref={menuRef}>
+    <div
+      className={["user-menu", open ? "is-open" : "", closing ? "is-closing" : ""]
+        .filter(Boolean)
+        .join(" ")}
+      ref={menuRef}
+    >
       <button
         type="button"
         className="user-menu__trigger"
-        onClick={() => setOpen((current) => !current)}
+        onClick={() => {
+          if (open) {
+            closeMenu();
+          } else {
+            openMenu();
+          }
+        }}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") {
+            closeMenu();
+          }
+        }}
+        aria-label="Open account menu"
         aria-haspopup="menu"
         aria-expanded={open}
       >
         <span className="user-menu__avatar">{session?.initials ?? "JD"}</span>
       </button>
-      {open ? (
-        <div className="user-menu__dropdown" role="menu">
+      {renderMenu ? (
+        <div
+          className={`user-menu__dropdown ${closing ? "is-closing" : ""}`}
+          role="menu"
+        >
           <div className="user-menu__identity">
             <strong>{session?.displayName ?? "Jordan Doe"}</strong>
             <span>{session?.username ?? "Jordan Doe"}</span>
@@ -487,35 +383,46 @@ export function ResultTabs({
     <div className="results-tabs">
       <div className="results-tabs__list" role="tablist">
         {showDiagnosticsTab ? (
-          <button
-            type="button"
-            role="tab"
-            className={`results-tab ${activeTabId === "diagnostics" ? "is-active" : ""}`}
-            onClick={() => onSelectTab("diagnostics")}
-          >
-            Diagnostics
-          </button>
+          <div className={`results-tab ${activeTabId === "diagnostics" ? "is-active" : ""}`}>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTabId === "diagnostics"}
+              tabIndex={activeTabId === "diagnostics" ? 0 : -1}
+              className="results-tab__button"
+              onClick={() => onSelectTab("diagnostics")}
+            >
+              Diagnostics
+            </button>
+          </div>
         ) : null}
         {versions.map((version) => (
-          <button
+          <div
             key={version.id}
-            type="button"
-            role="tab"
             className={`results-tab ${activeTabId === version.id ? "is-active" : ""}`}
-            onClick={() => onSelectTab(version.id)}
           >
-            <span>{version.label}</span>
-            <span
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTabId === version.id}
+              tabIndex={activeTabId === version.id ? 0 : -1}
+              className="results-tab__button"
+              onClick={() => onSelectTab(version.id)}
+            >
+              <span>{version.label}</span>
+            </button>
+            <button
+              type="button"
               className="results-tab__close"
+              aria-label={`Close ${version.label}`}
               onClick={(event) => {
                 event.stopPropagation();
                 onCloseVersion(version.id);
               }}
-              aria-hidden
             >
               <CloseIcon className="results-tab__close-icon" />
-            </span>
-          </button>
+            </button>
+          </div>
         ))}
       </div>
       {trailing ? <div className="results-tabs__trailing">{trailing}</div> : null}
@@ -732,7 +639,11 @@ export function ComparisonTrailingAction({
   onExit: () => void;
 }) {
   return (
-    <button type="button" className="button button--ghost button--small" onClick={onExit}>
+    <button
+      type="button"
+      className="button comparison-trailing-action"
+      onClick={onExit}
+    >
       <CloseIcon className="button__icon" />
       Exit Comparison
     </button>
