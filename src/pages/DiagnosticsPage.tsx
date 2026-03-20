@@ -1,4 +1,6 @@
+import type { TFunction } from "i18next";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import { SplitPane } from "../components/SplitPane";
 import {
@@ -11,10 +13,12 @@ import {
 } from "../components/WorkbenchParts";
 import { useToast } from "../context/ToastContext";
 import {
-  defaultDiagnosticsIssues,
-  defaultDiagnosticsPrompt,
-  defaultDiagnosticsVersions,
+  getDefaultDiagnosticsIssues,
+  getDefaultDiagnosticsPrompt,
+  getDefaultDiagnosticsVersions,
+  getVersionLabel,
   models,
+  relabelVersions,
   runMockDiagnosis,
   runMockOptimization,
   sleep,
@@ -28,7 +32,7 @@ function readRatio() {
   return Number.isFinite(stored) && stored > 0.2 && stored < 0.8 ? stored : 0.4;
 }
 
-function buildInitialState(routeState: unknown): DiagnosticsRouteState {
+function buildInitialState(routeState: unknown, t: TFunction<"workbench">): DiagnosticsRouteState {
   if (
     routeState &&
     typeof routeState === "object" &&
@@ -41,18 +45,22 @@ function buildInitialState(routeState: unknown): DiagnosticsRouteState {
   }
 
   return {
-    prompt: defaultDiagnosticsPrompt,
-    issues: defaultDiagnosticsIssues,
-    versions: defaultDiagnosticsVersions,
+    prompt: getDefaultDiagnosticsPrompt(t),
+    issues: getDefaultDiagnosticsIssues(t),
+    versions: getDefaultDiagnosticsVersions(t),
     activeTabId: "diagnostics",
   };
 }
 
 export function DiagnosticsPage() {
+  const { t } = useTranslation("workbench");
   const location = useLocation();
   const navigate = useNavigate();
   const { showToast } = useToast();
-  const routeState = useMemo(() => buildInitialState(location.state), [location.key, location.state]);
+  const routeState = useMemo(
+    () => buildInitialState(location.state, t),
+    [location.key, location.state],
+  );
   const [prompt, setPrompt] = useState(routeState.prompt);
   const [issues, setIssues] = useState(routeState.issues);
   const [versions, setVersions] = useState(routeState.versions);
@@ -64,11 +72,19 @@ export function DiagnosticsPage() {
   const [ratio, setRatio] = useState(readRatio);
 
   useEffect(() => {
+    document.title = t("workbench:pageTitle.diagnostics");
+  }, [t]);
+
+  useEffect(() => {
     setPrompt(routeState.prompt);
     setIssues(routeState.issues);
     setVersions(routeState.versions);
     setActiveTabId(routeState.activeTabId);
   }, [routeState]);
+
+  useEffect(() => {
+    setVersions((current) => relabelVersions(current, t));
+  }, [t]);
 
   useEffect(() => {
     window.localStorage.setItem(SPLIT_KEY, String(ratio));
@@ -80,14 +96,14 @@ export function DiagnosticsPage() {
   async function handleDiagnose() {
     setLoadingState("diagnose");
     await sleep();
-    setIssues(runMockDiagnosis(prompt));
+    setIssues(runMockDiagnosis(prompt, t));
     setActiveTabId("diagnostics");
     setLoadingState(null);
   }
 
   async function handleOptimize(useDiagnostics: boolean) {
     if (versions.length >= 10) {
-      showToast("Close an older version tab before creating another one.", "error");
+      showToast(t("workbench:toasts.closeOlderVersion"), "error");
       return;
     }
 
@@ -96,8 +112,8 @@ export function DiagnosticsPage() {
     const nextIndex = versions.length;
     const nextVersion: VersionRecord = {
       id: `version-${Date.now()}`,
-      label: `Version ${versions.length + 1}`,
-      content: runMockOptimization(prompt, nextIndex, useDiagnostics ? issues : undefined),
+      label: getVersionLabel(t, versions.length + 1),
+      content: runMockOptimization(prompt, nextIndex, t, useDiagnostics ? issues : undefined),
     };
     setVersions((current) => [...current, nextVersion]);
     setActiveTabId(nextVersion.id);
@@ -116,7 +132,7 @@ export function DiagnosticsPage() {
 
   function handleAdopt(version: VersionRecord) {
     setPrompt(version.content);
-    showToast(`${version.label} copied into the editor.`, "success");
+    showToast(t("workbench:toasts.versionCopiedToEditor", { label: version.label }), "success");
   }
 
   function handleCompare(version: VersionRecord) {
@@ -148,11 +164,11 @@ export function DiagnosticsPage() {
           onRatioChange={setRatio}
           left={(
             <PromptPanel
-              title="Prompt Editor"
+              title={t("workbench:prompt.editorTitle")}
               prompt={prompt}
               onPromptChange={setPrompt}
-              charLabel={`${prompt.length} characters`}
-              placeholder="Enter your prompt here..."
+              charLabel={t("workbench:prompt.charCount", { count: prompt.length })}
+              placeholder={t("workbench:prompt.diagnosticsPlaceholder")}
               variant="diagnostics"
               showActions
               canSubmit={trimmedPrompt.length > 0}
@@ -181,12 +197,14 @@ export function DiagnosticsPage() {
                   version={activeVersion}
                   onAdopt={() => handleAdopt(activeVersion)}
                   onCompare={() => handleCompare(activeVersion)}
-                  onCopied={() => showToast(`${activeVersion.label} copied to clipboard.`, "success")}
+                  onCopied={() =>
+                    showToast(t("workbench:toasts.copiedToClipboard", { label: activeVersion.label }), "success")
+                  }
                 />
               ) : (
                 <EmptyState
-                  title="No version selected"
-                  body="Generate a new optimized version or reopen an existing tab."
+                  title={t("workbench:states.noVersionTitle")}
+                  body={t("workbench:states.noVersionBody")}
                 />
               )}
             </section>

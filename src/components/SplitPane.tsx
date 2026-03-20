@@ -5,6 +5,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useTranslation } from "react-i18next";
 
 interface SplitPaneProps {
   ratio: number;
@@ -27,6 +28,7 @@ export function SplitPane({
   minLeft = 320,
   minRight = 420,
 }: SplitPaneProps) {
+  const { t } = useTranslation("common");
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [dragging, setDragging] = useState(false);
 
@@ -78,7 +80,7 @@ export function SplitPane({
         type="button"
         className={`split-pane__handle ${dragging ? "is-active" : ""}`}
         onMouseDown={() => setDragging(true)}
-        aria-label="Resize panels"
+        aria-label={t("common:resizePanels")}
       >
         <span className="split-pane__handle-line" />
       </button>

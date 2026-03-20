@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { BoltIcon } from "../components/Icons";
+import { LocaleSwitcher } from "../components/LocaleSwitcher";
 import { useAuth } from "../context/AuthContext";
 
 export function LoginPage() {
+  const { t } = useTranslation(["login"]);
   const { session, login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -16,10 +19,14 @@ export function LoginPage() {
     return <Navigate to="/workbench/diagnostics" replace />;
   }
 
+  useEffect(() => {
+    document.title = t("login:pageTitle");
+  }, [t]);
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!username.trim() || !password.trim()) {
-      setError("Enter both username and password to continue.");
+      setError(t("login:errors.missingCredentials"));
       return;
     }
 
@@ -33,7 +40,7 @@ export function LoginPage() {
         "/workbench/diagnostics";
       navigate(redirectTarget, { replace: true });
     } catch {
-      setError("We could not sign you in. Please try again.");
+      setError(t("login:errors.signInFailed"));
     } finally {
       setLoading(false);
     }
@@ -46,29 +53,29 @@ export function LoginPage() {
           <div className="login-hero__mark">
             <BoltIcon className="login-hero__icon" />
           </div>
-          <h1>Prompt Optimization Tool</h1>
-          <p>Refine your AI interactions with precision</p>
+          <h1>{t("login:title")}</h1>
+          <p>{t("login:subtitle")}</p>
         </header>
 
         <section className="auth-card">
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="field-group">
-              <label htmlFor="username">Username</label>
+              <label htmlFor="username">{t("login:fields.username")}</label>
               <input
                 id="username"
                 type="text"
                 className="text-field"
                 value={username}
                 onChange={(event) => setUsername(event.target.value)}
-                placeholder="Enter your username"
+                placeholder={t("login:placeholders.username")}
               />
             </div>
 
             <div className="field-group">
               <div className="field-group__meta">
-                <label htmlFor="password">Password</label>
+                <label htmlFor="password">{t("login:fields.password")}</label>
                 <button type="button" className="inline-link">
-                  Forgot password?
+                  {t("login:forgotPassword")}
                 </button>
               </div>
               <input
@@ -77,32 +84,33 @@ export function LoginPage() {
                 className="text-field"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                placeholder="••••••••"
+                placeholder={t("login:placeholders.password")}
               />
             </div>
 
             {error ? <p className="form-error">{error}</p> : null}
 
             <button type="submit" className="button button--primary button--wide" disabled={loading}>
-              {loading ? "Signing in..." : "Login"}
+              {loading ? t("login:submitLoading") : t("login:submit")}
             </button>
 
             <p className="auth-form__footnote">
-              Don&apos;t have an account?{" "}
+              {t("login:signupLead")}{" "}
               <button type="button" className="inline-link inline-link--strong">
-                Sign up for free
+                {t("login:signupAction")}
               </button>
             </p>
           </form>
         </section>
 
         <footer className="login-footer">
+          <LocaleSwitcher className="login-footer__locale" />
           <div className="login-footer__links">
-            <button type="button">Privacy Policy</button>
-            <button type="button">Terms of Service</button>
-            <button type="button">Support</button>
+            <button type="button">{t("login:footer.privacy")}</button>
+            <button type="button">{t("login:footer.terms")}</button>
+            <button type="button">{t("login:footer.support")}</button>
           </div>
-          <p>© 2023 Prompt Optimization Tool. All rights reserved.</p>
+          <p>{t("login:footer.copyright")}</p>
         </footer>
       </div>
     </main>

@@ -6,10 +6,12 @@ import {
   type ReactNode,
   type TextareaHTMLAttributes,
 } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { diffText } from "../lib/diff";
+import { LocaleSwitcher } from "./LocaleSwitcher";
 import { CustomSelect } from "./CustomSelect";
 import {
   BoltIcon,
@@ -29,20 +31,29 @@ import type {
 
 type ActiveTabId = "diagnostics" | string;
 
-function badgeClass(label: string) {
-  switch (label.toLowerCase()) {
-    case "optimization":
-      return "badge badge--mint";
-    case "missing":
-      return "badge badge--rose";
-    default:
-      return "badge badge--teal";
+function badgeClass(
+  label: string,
+  optimizationLabel: string,
+  missingLabel: string,
+) {
+  const normalized = label.toLowerCase();
+  const optimizationTokens = new Set([optimizationLabel.toLowerCase(), "optimization", "可优化"]);
+  const missingTokens = new Set([missingLabel.toLowerCase(), "missing", "缺失"]);
+
+  if (optimizationTokens.has(normalized)) {
+    return "badge badge--mint";
   }
+
+  if (missingTokens.has(normalized)) {
+    return "badge badge--rose";
+  }
+
+  return "badge badge--teal";
 }
 
 export function BrandLockup({
   compact = false,
-  title = "PromptOpt",
+  title,
   subtitle,
   mark = "bolt",
   showDivider = false,
@@ -53,6 +64,9 @@ export function BrandLockup({
   mark?: "bolt" | "letter";
   showDivider?: boolean;
 }) {
+  const { t } = useTranslation("common");
+  const resolvedTitle = title ?? t("common:brand.short");
+
   return (
     <div className={`brand-lockup ${compact ? "is-compact" : ""}`}>
       <div className={`brand-lockup__mark brand-lockup__mark--${mark}`}>
@@ -63,7 +77,7 @@ export function BrandLockup({
         )}
       </div>
       <div className="brand-lockup__copy">
-        <span className="brand-lockup__title">{title}</span>
+        <span className="brand-lockup__title">{resolvedTitle}</span>
         {subtitle ? (
           <>
             {showDivider ? <span className="brand-lockup__divider">|</span> : null}
@@ -76,7 +90,12 @@ export function BrandLockup({
 }
 
 export function ThemeToggleButton() {
+  const { t } = useTranslation("common");
   const { theme, toggleTheme } = useTheme();
+  const nextThemeLabel =
+    theme === "light"
+      ? t("common:theme.switchToDark")
+      : t("common:theme.switchToLight");
 
   return (
     <button
@@ -84,8 +103,8 @@ export function ThemeToggleButton() {
       className="icon-button"
       onClick={toggleTheme}
       aria-pressed={theme === "dark"}
-      aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
-      title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+      aria-label={nextThemeLabel}
+      title={nextThemeLabel}
     >
       {theme === "light" ? (
         <MoonIcon className="icon-button__icon" />
@@ -105,14 +124,16 @@ export function ModelSelect({
   value: string;
   onChange: (value: string) => void;
 }) {
+  const { t } = useTranslation("common");
+
   return (
     <CustomSelect
-      ariaLabel="Model selector"
+      ariaLabel={t("common:modelSelector")}
       options={options.map((option) => ({
         label: option.name,
         value: option.identifier,
         disabled: !option.available,
-        meta: option.available ? undefined : "Not configured",
+        meta: option.available ? undefined : t("common:notConfigured"),
       }))}
       value={value}
       onChange={onChange}
@@ -121,6 +142,7 @@ export function ModelSelect({
 }
 
 export function UserMenu() {
+  const { t } = useTranslation(["common", "workbench"]);
   const { session, logout } = useAuth();
   const closeTimerRef = useRef<number | null>(null);
   const [open, setOpen] = useState(false);
@@ -200,7 +222,7 @@ export function UserMenu() {
             closeMenu();
           }
         }}
-        aria-label="Open account menu"
+        aria-label={t("common:accountMenu")}
         aria-haspopup="menu"
         aria-expanded={open}
       >
@@ -212,8 +234,12 @@ export function UserMenu() {
           role="menu"
         >
           <div className="user-menu__identity">
-            <strong>{session?.displayName ?? "Jordan Doe"}</strong>
-            <span>{session?.username ?? "Jordan Doe"}</span>
+            <strong>{session?.displayName ?? t("common:account")}</strong>
+            <span>{session?.username ?? t("common:brand.short")}</span>
+          </div>
+          <div className="user-menu__section">
+            <span className="user-menu__section-label">{t("workbench:menu.language")}</span>
+            <LocaleSwitcher className="user-menu__locale" />
           </div>
           <button
             type="button"
@@ -221,7 +247,7 @@ export function UserMenu() {
             onClick={logout}
           >
             <LogoutIcon className="user-menu__action-icon" />
-            Log out
+            {t("common:logout")}
           </button>
         </div>
       ) : null}
@@ -238,10 +264,12 @@ export function DiagnosticsTopBar({
   selectedModel: string;
   onSelectModel: (value: string) => void;
 }) {
+  const { t } = useTranslation("common");
+
   return (
     <header className="topbar">
       <div className="topbar__left">
-        <BrandLockup compact title="PromptOpt" mark="letter" />
+        <BrandLockup compact title={t("common:brand.short")} mark="letter" />
         <ModelSelect
           options={modelOptions}
           value={selectedModel}
@@ -257,21 +285,27 @@ export function DiagnosticsTopBar({
 }
 
 export function ComparisonTopBar() {
+  const { t } = useTranslation(["common", "workbench"]);
+
   return (
     <header className="topbar topbar--comparison">
       <div className="topbar__left">
-        <BrandLockup title="PromptOpt" subtitle="Workbench" showDivider />
+        <BrandLockup
+          title={t("common:brand.short")}
+          subtitle={t("workbench:topbar.subtitle")}
+          showDivider
+        />
       </div>
       <div className="topbar__right">
-        <nav className="segment-nav" aria-label="Workbench sections">
+        <nav className="segment-nav" aria-label={t("workbench:topbar.navAria")}>
           <button type="button" className="segment-nav__item">
-            Project
+            {t("workbench:topbar.nav.project")}
           </button>
           <button type="button" className="segment-nav__item is-active">
-            Workbench
+            {t("workbench:topbar.nav.workbench")}
           </button>
           <button type="button" className="segment-nav__item">
-            History
+            {t("workbench:topbar.nav.history")}
           </button>
         </nav>
         <ThemeToggleButton />
@@ -308,6 +342,8 @@ export function PromptPanel({
   onDiagnose,
   onOptimize,
 }: PromptPanelProps) {
+  const { t } = useTranslation("workbench");
+
   function handleKeyDown(
     event: React.KeyboardEvent<HTMLTextAreaElement>,
   ) {
@@ -355,7 +391,9 @@ export function PromptPanel({
             onClick={onDiagnose}
             disabled={!canSubmit || loadingState !== null}
           >
-            {loadingState === "diagnose" ? "Diagnosing..." : "Diagnose"}
+            {loadingState === "diagnose"
+              ? t("workbench:actions.diagnosing")
+              : t("workbench:actions.diagnose")}
           </button>
           <button
             type="button"
@@ -363,7 +401,9 @@ export function PromptPanel({
             onClick={onOptimize}
             disabled={!canSubmit || loadingState !== null}
           >
-            {loadingState === "optimize" ? "Optimizing..." : "Optimize"}
+            {loadingState === "optimize"
+              ? t("workbench:actions.optimizing")
+              : t("workbench:actions.optimize")}
           </button>
         </div>
       ) : null}
@@ -386,6 +426,8 @@ export function ResultTabs({
   showDiagnosticsTab?: boolean;
   trailing?: ReactNode;
 }) {
+  const { t } = useTranslation("workbench");
+
   return (
     <div className="results-tabs">
       <div className="results-tabs__list" role="tablist">
@@ -399,7 +441,7 @@ export function ResultTabs({
               className="results-tab__button"
               onClick={() => onSelectTab("diagnostics")}
             >
-              Diagnostics
+              {t("workbench:tabs.diagnostics")}
             </button>
           </div>
         ) : null}
@@ -421,7 +463,7 @@ export function ResultTabs({
             <button
               type="button"
               className="results-tab__close"
-              aria-label={`Close ${version.label}`}
+              aria-label={t("workbench:tabs.closeVersion", { label: version.label })}
               onClick={(event) => {
                 event.stopPropagation();
                 onCloseVersion(version.id);
@@ -446,6 +488,10 @@ export function DiagnosticsPanel({
   onOptimize: () => void;
   isLoading: boolean;
 }) {
+  const { t } = useTranslation("workbench");
+  const optimizationLabel = t("workbench:badges.optimization");
+  const missingLabel = t("workbench:badges.missing");
+
   return (
     <section className="results-shell">
       <div className="results-scroll">
@@ -453,12 +499,16 @@ export function DiagnosticsPanel({
           {issues.map((issue) => (
             <article key={issue.id} className="diagnostic-card">
               <div className="diagnostic-card__header">
-                <span className={badgeClass(issue.label)}>{issue.label}</span>
+                <span className={badgeClass(issue.label, optimizationLabel, missingLabel)}>
+                  {issue.label}
+                </span>
                 <h3 className="diagnostic-card__title">{issue.title}</h3>
               </div>
               <p className="diagnostic-card__body">{issue.description}</p>
               <div className="diagnostic-card__suggestion">
-                <span className="diagnostic-card__suggestion-label">Suggestion</span>
+                <span className="diagnostic-card__suggestion-label">
+                  {t("workbench:states.suggestion")}
+                </span>
                 <p>{issue.suggestion}</p>
               </div>
             </article>
@@ -468,7 +518,9 @@ export function DiagnosticsPanel({
       <div className="results-footer">
         <button type="button" className="button button--accent button--wide" onClick={onOptimize}>
           <BoltIcon className="button__icon" />
-          {isLoading ? "Optimizing..." : "Optimize based on diagnostics"}
+          {isLoading
+            ? t("workbench:actions.optimizing")
+            : t("workbench:actions.optimizeFromDiagnostics")}
         </button>
       </div>
     </section>
@@ -503,6 +555,7 @@ export function VersionPanel({
   onCompare: () => void;
   onCopied: () => void;
 }) {
+  const { t } = useTranslation("workbench");
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
@@ -522,15 +575,15 @@ export function VersionPanel({
       <div className="results-footer results-footer--inline">
         <div className="button-row">
           <button type="button" className="button button--accent" onClick={onAdopt}>
-            Adopt
+            {t("workbench:actions.adopt")}
           </button>
           <button type="button" className="button button--ghost" onClick={handleCopy}>
             {copied ? <CheckIcon className="button__icon" /> : <CopyIcon className="button__icon" />}
-            {copied ? "Copied" : "Copy"}
+            {copied ? t("workbench:actions.copied") : t("workbench:actions.copy")}
           </button>
         </div>
         <button type="button" className="button button--ghost" onClick={onCompare}>
-          Compare
+          {t("workbench:actions.compare")}
         </button>
       </div>
     </section>
@@ -552,6 +605,7 @@ export function DiffPanel({
   onAdopt: () => void;
   onCopied: () => void;
 }) {
+  const { t } = useTranslation("workbench");
   const [copied, setCopied] = useState(false);
   const diffChunks = useMemo(() => diffText(prompt, version.content), [prompt, version.content]);
 
@@ -591,11 +645,11 @@ export function DiffPanel({
       <div className="results-footer results-footer--inline results-footer--compare">
         <div className="button-row button-row--compare">
           <button type="button" className="button button--accent" onClick={onAdopt}>
-            Adopt
+            {t("workbench:actions.adopt")}
           </button>
           <button type="button" className="button button--ghost" onClick={handleCopy}>
             {copied ? <CheckIcon className="button__icon" /> : <CopyIcon className="button__icon" />}
-            {copied ? "Copied" : "Copy"}
+            {copied ? t("workbench:actions.copied") : t("workbench:actions.copy")}
           </button>
         </div>
         <div className="toggle-pill toggle-pill--compare">
@@ -604,14 +658,14 @@ export function DiffPanel({
             className={`toggle-pill__item ${viewMode === "preview" ? "is-active" : ""}`}
             onClick={() => onViewModeChange("preview")}
           >
-            Preview
+            {t("workbench:actions.preview")}
           </button>
           <button
             type="button"
             className={`toggle-pill__item ${viewMode === "compare" ? "is-active" : ""}`}
             onClick={() => onViewModeChange("compare")}
           >
-            Compare
+            {t("workbench:actions.compare")}
           </button>
         </div>
       </div>
@@ -645,6 +699,8 @@ export function ComparisonTrailingAction({
 }: {
   onExit: () => void;
 }) {
+  const { t } = useTranslation("workbench");
+
   return (
     <button
       type="button"
@@ -652,20 +708,22 @@ export function ComparisonTrailingAction({
       onClick={onExit}
     >
       <CloseIcon className="button__icon" />
-      Exit Comparison
+      {t("workbench:actions.exitComparison")}
     </button>
   );
 }
 
 export function StatusBar() {
+  const { t } = useTranslation(["common", "workbench"]);
+
   return (
     <footer className="status-bar">
-      <div>Prompt Optimization Tool v2.4.1</div>
+      <div>{t("common:brand.full")} v2.4.1</div>
       <div className="status-bar__right">
-        <span>Ready</span>
+        <span>{t("workbench:states.ready")}</span>
         <span className="status-pill">
           <span className="status-pill__dot" />
-          System Online
+          {t("workbench:states.systemOnline")}
         </span>
       </div>
     </footer>
