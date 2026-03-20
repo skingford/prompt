@@ -1,4 +1,5 @@
 import {
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -43,15 +44,21 @@ export function BrandLockup({
   compact = false,
   title = "PromptOpt",
   subtitle,
+  mark = "bolt",
 }: {
   compact?: boolean;
   title?: string;
   subtitle?: string;
+  mark?: "bolt" | "letter";
 }) {
   return (
     <div className={`brand-lockup ${compact ? "is-compact" : ""}`}>
-      <div className="brand-lockup__mark">
-        <BoltIcon className="brand-lockup__icon" />
+      <div className={`brand-lockup__mark brand-lockup__mark--${mark}`}>
+        {mark === "letter" ? (
+          <span className="brand-lockup__letter">P</span>
+        ) : (
+          <BoltIcon className="brand-lockup__icon" />
+        )}
       </div>
       <div className="brand-lockup__copy">
         <span className="brand-lockup__title">{title}</span>
@@ -90,25 +97,196 @@ export function ModelSelect({
   value: string;
   onChange: (value: string) => void;
 }) {
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const [open, setOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const selectedOption = options.find((option) => option.identifier === value) ?? options[0];
+
+  function findNextEnabledIndex(startIndex: number, direction: 1 | -1) {
+    let index = startIndex;
+    for (let step = 0; step < options.length; step += 1) {
+      index = (index + direction + options.length) % options.length;
+      if (options[index]?.available) {
+        return index;
+      }
+    }
+    return -1;
+  }
+
+  function findBoundaryEnabledIndex(direction: 1 | -1) {
+    const indices = direction === 1
+      ? options.map((_, index) => index)
+      : options.map((_, index) => options.length - 1 - index);
+
+    return indices.find((index) => options[index]?.available) ?? -1;
+  }
+
+  useEffect(() => {
+    function handlePointerDown(event: MouseEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+
+    function handleWindowBlur() {
+      setOpen(false);
+    }
+
+    window.addEventListener("pointerdown", handlePointerDown);
+    window.addEventListener("blur", handleWindowBlur);
+    return () => {
+      window.removeEventListener("pointerdown", handlePointerDown);
+      window.removeEventListener("blur", handleWindowBlur);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const selectedIndex = options.findIndex(
+      (option) => option.identifier === value && option.available,
+    );
+    setActiveIndex(selectedIndex >= 0 ? selectedIndex : findBoundaryEnabledIndex(1));
+  }, [open, options, value]);
+
+  function handleSelect(option: ModelOption) {
+    if (!option.available) {
+      return;
+    }
+    onChange(option.identifier);
+    setOpen(false);
+    triggerRef.current?.focus();
+  }
+
+  function handleKeyDown(event: React.KeyboardEvent<HTMLButtonElement>) {
+    if (event.key === "Tab") {
+      setOpen(false);
+      return;
+    }
+
+    if (event.key === "Escape") {
+      setOpen(false);
+      return;
+    }
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      if (!open) {
+        setOpen(true);
+        setActiveIndex(() => {
+          const selectedIndex = options.findIndex(
+            (option) => option.identifier === value && option.available,
+          );
+          return selectedIndex >= 0 ? selectedIndex : findBoundaryEnabledIndex(1);
+        });
+        return;
+      }
+      setActiveIndex((current) =>
+        findNextEnabledIndex(current < 0 ? options.length - 1 : current, 1),
+      );
+      return;
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      if (!open) {
+        setOpen(true);
+        setActiveIndex(() => {
+          const selectedIndex = options.findIndex(
+            (option) => option.identifier === value && option.available,
+          );
+          return selectedIndex >= 0 ? selectedIndex : findBoundaryEnabledIndex(-1);
+        });
+        return;
+      }
+      setActiveIndex((current) =>
+        findNextEnabledIndex(current < 0 ? 0 : current, -1),
+      );
+      return;
+    }
+
+    if (event.key === "Home" && open) {
+      event.preventDefault();
+      setActiveIndex(findBoundaryEnabledIndex(1));
+      return;
+    }
+
+    if (event.key === "End" && open) {
+      event.preventDefault();
+      setActiveIndex(findBoundaryEnabledIndex(-1));
+      return;
+    }
+
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      if (!open) {
+        setOpen(true);
+        return;
+      }
+
+      const option = options[activeIndex];
+      if (option?.available) {
+        handleSelect(option);
+      }
+    }
+  }
+
   return (
-    <label className="select-field">
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="select-field__native"
+    <div className={`custom-select ${open ? "is-open" : ""}`} ref={rootRef}>
+      <button
+        ref={triggerRef}
+        type="button"
+        className="custom-select__trigger"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((current) => !current)}
+        onKeyDown={handleKeyDown}
       >
-        {options.map((option) => (
-          <option
-            key={option.identifier}
-            value={option.identifier}
-            disabled={!option.available}
-          >
-            {option.available ? option.name : `${option.name} (Not configured)`}
-          </option>
-        ))}
-      </select>
-      <ChevronDownIcon className="select-field__chevron" />
-    </label>
+        <span className="custom-select__value">{selectedOption?.name ?? value}</span>
+        <ChevronDownIcon className="custom-select__chevron" />
+      </button>
+
+      {open ? (
+        <div className="custom-select__menu" role="listbox" aria-label="Model selector">
+          {options.map((option, index) => {
+            const selected = option.identifier === value;
+            const disabled = !option.available;
+            const active = index === activeIndex;
+
+            return (
+              <button
+                key={option.identifier}
+                type="button"
+                role="option"
+                aria-selected={selected}
+                disabled={disabled}
+                className={[
+                  "custom-select__option",
+                  selected ? "is-selected" : "",
+                  active ? "is-active" : "",
+                  disabled ? "is-disabled" : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                onMouseEnter={() => setActiveIndex(index)}
+                onClick={() => handleSelect(option)}
+              >
+                <span className="custom-select__option-copy">
+                  <span className="custom-select__option-label">{option.name}</span>
+                  {!option.available ? (
+                    <span className="custom-select__option-meta">Not configured</span>
+                  ) : null}
+                </span>
+                {selected ? <CheckIcon className="custom-select__option-icon" /> : null}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+    </div>
   );
 }
 
@@ -160,7 +338,7 @@ export function DiagnosticsTopBar({
   return (
     <header className="topbar">
       <div className="topbar__left">
-        <BrandLockup compact title="PromptOpt" />
+        <BrandLockup compact title="PromptOpt" mark="letter" />
         <ModelSelect
           options={modelOptions}
           value={selectedModel}
@@ -357,19 +535,21 @@ export function DiagnosticsPanel({
   return (
     <section className="results-shell">
       <div className="results-scroll">
-        {issues.map((issue) => (
-          <article key={issue.id} className="diagnostic-card">
-            <div className="diagnostic-card__header">
-              <span className={badgeClass(issue.label)}>{issue.label}</span>
-              <h3 className="diagnostic-card__title">{issue.title}</h3>
-            </div>
-            <p className="diagnostic-card__body">{issue.description}</p>
-            <div className="diagnostic-card__suggestion">
-              <span className="diagnostic-card__suggestion-label">Suggestion</span>
-              <p>{issue.suggestion}</p>
-            </div>
-          </article>
-        ))}
+        <div className="results-stack">
+          {issues.map((issue) => (
+            <article key={issue.id} className="diagnostic-card">
+              <div className="diagnostic-card__header">
+                <span className={badgeClass(issue.label)}>{issue.label}</span>
+                <h3 className="diagnostic-card__title">{issue.title}</h3>
+              </div>
+              <p className="diagnostic-card__body">{issue.description}</p>
+              <div className="diagnostic-card__suggestion">
+                <span className="diagnostic-card__suggestion-label">Suggestion</span>
+                <p>{issue.suggestion}</p>
+              </div>
+            </article>
+          ))}
+        </div>
       </div>
       <div className="results-footer">
         <button type="button" className="button button--accent button--wide" onClick={onOptimize}>

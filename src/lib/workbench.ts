@@ -67,13 +67,13 @@ export const defaultComparisonVersions: VersionRecord[] = [
     id: "travel-v1",
     label: "Version 1",
     content:
-      "Act as a specialized Tokyo travel consultant. I want to plan a comprehensive 5-day itinerary for Tokyo in late October (Autumn foliage peak). Provide a detailed itinerary focusing on authentic Edomae-style sushi experiences and significant Shinto shrines. Include estimated costs for each day and a cost-benefit analysis of the JR Pass vs. Suica cards. Ensure the tone is professional yet enthusiastic. I also need luxury and boutique hotel suggestions specifically within the Shinjuku and Shibuya districts.",
+      "Act as a specialized Tokyo travel consultant. I want to plan a comprehensive 5-day itinerary for Tokyo in late October (Autumn foliage peak).\n\nProvide a detailed itinerary focusing on authentic Edomae-style sushi experiences and significant Shinto shrines. Include estimated costs for each day and a cost-benefit analysis of the JR Pass vs. Suica cards.\n\nEnsure the tone is professional yet enthusiastic. I also need luxury and boutique hotel suggestions specifically within the Shinjuku and Shibuya districts.",
   },
   {
     id: "travel-v2",
     label: "Version 2",
     content:
-      "Act as an upscale Japan itinerary designer. Build a five-day Tokyo plan for the final week of October with a balanced mix of premium sushi counters, historic shrine visits, and efficient neighborhood routing. Break each day into morning, afternoon, and evening segments, estimate costs, and recommend whether the traveler should rely on JR Pass coverage or recharge a Suica card. Keep the tone warm, polished, and concierge-like, and recommend standout hotels in Shinjuku, Shibuya, and Ginza.",
+      "Act as an upscale Japan itinerary designer. Build a five-day Tokyo plan for the final week of October with a balanced mix of premium sushi counters, historic shrine visits, and efficient neighborhood routing.\n\nBreak each day into morning, afternoon, and evening segments, estimate costs, and recommend whether the traveler should rely on JR Pass coverage or recharge a Suica card.\n\nKeep the tone warm, polished, and concierge-like, and recommend standout hotels in Shinjuku, Shibuya, and Ginza.",
   },
 ];
 
@@ -172,9 +172,9 @@ function optimizeStakeholderPrompt(versionIndex: number) {
 
 function optimizeTravelPrompt(versionIndex: number) {
   const versions = [
-    "Act as a specialized Tokyo travel consultant. I want to plan a comprehensive 5-day itinerary for Tokyo in late October (Autumn foliage peak). Provide a detailed itinerary focusing on authentic Edomae-style sushi experiences and significant Shinto shrines. Include estimated costs for each day and a cost-benefit analysis of the JR Pass vs. Suica cards. Ensure the tone is professional yet enthusiastic. I also need luxury and boutique hotel suggestions specifically within the Shinjuku and Shibuya districts.",
-    "Act as an upscale Japan itinerary designer. Build a five-day Tokyo plan for the final week of October with a balanced mix of premium sushi counters, historic shrine visits, and efficient neighborhood routing. Break each day into morning, afternoon, and evening segments, estimate costs, and recommend whether the traveler should rely on JR Pass coverage or recharge a Suica card. Keep the tone warm, polished, and concierge-like, and recommend standout hotels in Shinjuku, Shibuya, and Ginza.",
-    "Act as a Tokyo destination specialist for a first-time premium traveler. Create a five-day late-October itinerary that blends heritage shrines, refined sushi experiences, evening neighborhood walks, and realistic transportation choices. Include daily budgets, hotel suggestions in well-connected districts, and practical advice on when a transit pass is worthwhile versus when IC-card travel is simpler.",
+    "Act as a specialized Tokyo travel consultant. I want to plan a comprehensive 5-day itinerary for Tokyo in late October (Autumn foliage peak).\n\nProvide a detailed itinerary focusing on authentic Edomae-style sushi experiences and significant Shinto shrines. Include estimated costs for each day and a cost-benefit analysis of the JR Pass vs. Suica cards.\n\nEnsure the tone is professional yet enthusiastic. I also need luxury and boutique hotel suggestions specifically within the Shinjuku and Shibuya districts.",
+    "Act as an upscale Japan itinerary designer. Build a five-day Tokyo plan for the final week of October with a balanced mix of premium sushi counters, historic shrine visits, and efficient neighborhood routing.\n\nBreak each day into morning, afternoon, and evening segments, estimate costs, and recommend whether the traveler should rely on JR Pass coverage or recharge a Suica card.\n\nKeep the tone warm, polished, and concierge-like, and recommend standout hotels in Shinjuku, Shibuya, and Ginza.",
+    "Act as a Tokyo destination specialist for a first-time premium traveler. Create a five-day late-October itinerary that blends heritage shrines, refined sushi experiences, evening neighborhood walks, and realistic transportation choices.\n\nInclude daily budgets, hotel suggestions in well-connected districts, and practical advice on when a transit pass is worthwhile versus when IC-card travel is simpler.\n\nKeep the structure concise, premium, and easy to scan for a traveler making quick booking decisions.",
   ];
 
   return versions[versionIndex % versions.length];

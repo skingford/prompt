@@ -66,7 +66,7 @@ export function SplitPane({
 
   const columns = useMemo(
     () => ({
-      gridTemplateColumns: `${ratio}fr 12px ${1 - ratio}fr`,
+      gridTemplateColumns: `${ratio}fr 8px ${1 - ratio}fr`,
     }),
     [ratio],
   );
