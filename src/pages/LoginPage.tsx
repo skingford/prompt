@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { BoltIcon } from "../components/Icons";
-import { LocaleSwitcher } from "../components/LocaleSwitcher";
 import { useAuth } from "../context/AuthContext";
 
 export function LoginPage() {
@@ -104,7 +103,6 @@ export function LoginPage() {
         </section>
 
         <footer className="login-footer">
-          <LocaleSwitcher className="login-footer__locale" />
           <div className="login-footer__links">
             <button type="button">{t("login:footer.privacy")}</button>
             <button type="button">{t("login:footer.terms")}</button>
