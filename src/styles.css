@@ -1305,6 +1305,7 @@ pre {
 .results-shell {
   display: flex;
   flex-direction: column;
+  min-width: 0;
   min-height: 0;
   flex: 1;
   overflow: hidden;
@@ -1312,6 +1313,7 @@ pre {
 
 .results-scroll {
   flex: 1;
+  min-width: 0;
   min-height: 0;
   overflow: auto;
   padding: 16px 18px;
@@ -1426,12 +1428,15 @@ pre {
 .version-card,
 .diff-card {
   flex: 1;
-  min-height: 100%;
+  min-width: 0;
+  min-height: 0;
+  max-width: 100%;
   width: 100%;
   border-radius: 14px;
   border: 1px solid var(--border);
   background: var(--surface);
   padding: 18px;
+  overflow: hidden;
   box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
 }
 
@@ -1443,11 +1448,15 @@ pre {
 
 .version-card__content,
 .diff-card__content {
+  width: 100%;
+  max-width: 100%;
   font-family: var(--font-mono);
   font-size: 0.9rem;
   line-height: 1.7;
   color: color-mix(in srgb, var(--text-primary) 85%, white 15%);
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .version-card__content.is-streaming::after {
