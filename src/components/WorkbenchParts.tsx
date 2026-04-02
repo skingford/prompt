@@ -516,7 +516,12 @@ export function DiagnosticsPanel({
         </div>
       </div>
       <div className="results-footer">
-        <button type="button" className="button button--accent button--wide" onClick={onOptimize}>
+        <button
+          type="button"
+          className="button button--accent button--wide"
+          onClick={onOptimize}
+          disabled={isLoading}
+        >
           <BoltIcon className="button__icon" />
           {isLoading
             ? t("workbench:actions.optimizing")
@@ -557,6 +562,7 @@ export function VersionPanel({
 }) {
   const { t } = useTranslation("workbench");
   const [copied, setCopied] = useState(false);
+  const isStreaming = Boolean(version.isStreaming);
 
   async function handleCopy() {
     await writeToClipboard(version.content);
@@ -566,23 +572,43 @@ export function VersionPanel({
   }
 
   return (
-    <section className="results-shell">
+    <section className="results-shell" aria-busy={isStreaming}>
       <div className="results-scroll">
         <div className="version-card">
-          <pre className="version-card__content">{version.content}</pre>
+          {isStreaming ? (
+            <div className="version-card__status">{t("workbench:states.streamingVersion")}</div>
+          ) : null}
+          <pre className={`version-card__content ${isStreaming ? "is-streaming" : ""}`}>
+            {version.content}
+          </pre>
         </div>
       </div>
       <div className="results-footer results-footer--inline">
         <div className="button-row">
-          <button type="button" className="button button--accent" onClick={onAdopt}>
+          <button
+            type="button"
+            className="button button--accent"
+            onClick={onAdopt}
+            disabled={isStreaming}
+          >
             {t("workbench:actions.adopt")}
           </button>
-          <button type="button" className="button button--ghost" onClick={handleCopy}>
+          <button
+            type="button"
+            className="button button--ghost"
+            onClick={handleCopy}
+            disabled={isStreaming || version.content.length === 0}
+          >
             {copied ? <CheckIcon className="button__icon" /> : <CopyIcon className="button__icon" />}
             {copied ? t("workbench:actions.copied") : t("workbench:actions.copy")}
           </button>
         </div>
-        <button type="button" className="button button--ghost" onClick={onCompare}>
+        <button
+          type="button"
+          className="button button--ghost"
+          onClick={onCompare}
+          disabled={isStreaming}
+        >
           {t("workbench:actions.compare")}
         </button>
       </div>

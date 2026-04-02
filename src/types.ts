@@ -26,6 +26,7 @@ export interface VersionRecord {
   id: string;
   label: string;
   content: string;
+  isStreaming?: boolean;
 }
 
 export interface DiagnosticsRouteState {

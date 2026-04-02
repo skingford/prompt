@@ -8,11 +8,14 @@ import type {
 type WorkbenchT = TFunction<"workbench">;
 
 export const models: ModelOption[] = [
-  { name: "Claude", identifier: "claude", available: true },
-  { name: "GPT-4", identifier: "gpt-4", available: false },
-  { name: "Gemini Pro", identifier: "gemini-pro", available: true },
-  { name: "Llama 3", identifier: "llama-3", available: true },
+  { name: "GPT-5.4", identifier: "gpt-5.4", available: true },
+  { name: "Claude", identifier: "claude", available: false },
+  { name: "Gemini Pro", identifier: "gemini-pro", available: false },
+  { name: "Llama 3", identifier: "llama-3", available: false },
 ];
+
+export const DEFAULT_MODEL_IDENTIFIER =
+  models.find((model) => model.available)?.identifier ?? "gpt-5.4";
 
 function issueFromPath(t: WorkbenchT, path: string): DiagnosticIssue {
   return {

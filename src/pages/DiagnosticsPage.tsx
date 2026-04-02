@@ -1,5 +1,5 @@
 import type { TFunction } from "i18next";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import { SplitPane } from "../components/SplitPane";
@@ -13,6 +13,11 @@ import {
 } from "../components/WorkbenchParts";
 import { useToast } from "../context/ToastContext";
 import {
+  ChatCompletionError,
+  optimizePrompt,
+} from "../lib/chatCompletions";
+import {
+  DEFAULT_MODEL_IDENTIFIER,
   getDefaultDiagnosticsIssues,
   getDefaultDiagnosticsPrompt,
   getDefaultDiagnosticsVersions,
@@ -20,10 +25,12 @@ import {
   models,
   relabelVersions,
   runMockDiagnosis,
-  runMockOptimization,
   sleep,
 } from "../lib/workbench";
-import type { DiagnosticsRouteState, VersionRecord } from "../types";
+import type {
+  DiagnosticsRouteState,
+  VersionRecord,
+} from "../types";
 
 const SPLIT_KEY = "promptopt.split.diagnostics";
 
@@ -52,6 +59,37 @@ function buildInitialState(routeState: unknown, t: TFunction<"workbench">): Diag
   };
 }
 
+function buildOptimizeErrorMessage(
+  error: unknown,
+  t: TFunction<"workbench">,
+) {
+  if (
+    error instanceof ChatCompletionError &&
+    error.message === "The gateway returned no completion text."
+  ) {
+    return t("workbench:toasts.gatewayEmptyResponse");
+  }
+
+  if (
+    error instanceof ChatCompletionError &&
+    error.message ===
+      "Unable to reach the local chat gateway. Restart the Vite server after updating the proxy settings."
+  ) {
+    return t("workbench:toasts.gatewayUnavailable");
+  }
+
+  if (error instanceof Error && error.name === "AbortError") {
+    return null;
+  }
+
+  const detail =
+    error instanceof Error && error.message.trim().length > 0
+      ? error.message.trim()
+      : t("workbench:toasts.gatewayEmptyResponse");
+
+  return t("workbench:toasts.gatewayRequestFailed", { message: detail });
+}
+
 export function DiagnosticsPage() {
   const { t } = useTranslation("workbench");
   const location = useLocation();
@@ -65,15 +103,123 @@ export function DiagnosticsPage() {
   const [issues, setIssues] = useState(routeState.issues);
   const [versions, setVersions] = useState(routeState.versions);
   const [activeTabId, setActiveTabId] = useState<"diagnostics" | string>(routeState.activeTabId);
-  const [selectedModel, setSelectedModel] = useState("claude");
+  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL_IDENTIFIER);
   const [loadingState, setLoadingState] = useState<
     "diagnose" | "optimize" | "optimize-diagnostics" | null
   >(null);
   const [ratio, setRatio] = useState(readRatio);
+  const optimizeAbortRef = useRef<AbortController | null>(null);
+  const receivedStreamingContentRef = useRef("");
+  const displayedStreamingContentRef = useRef("");
+  const typingFrameRef = useRef<number | null>(null);
+  const streamingVersionIdRef = useRef<string | null>(null);
+  const isMountedRef = useRef(true);
+
+  function cancelTypingFrame() {
+    if (typingFrameRef.current !== null) {
+      window.cancelAnimationFrame(typingFrameRef.current);
+      typingFrameRef.current = null;
+    }
+  }
+
+  function syncStreamingVersion(
+    versionId: string,
+    content: string,
+    isStreaming: boolean,
+  ) {
+    setVersions((current) =>
+      current.map((version) =>
+        version.id === versionId
+          ? {
+              ...version,
+              content,
+              isStreaming,
+            }
+          : version,
+      ),
+    );
+  }
+
+  function getTypingStepSize(backlog: number) {
+    if (backlog > 160) {
+      return 14;
+    }
+
+    if (backlog > 96) {
+      return 10;
+    }
+
+    if (backlog > 48) {
+      return 6;
+    }
+
+    if (backlog > 18) {
+      return 3;
+    }
+
+    return 1;
+  }
+
+  function scheduleTypewriter(versionId: string) {
+    if (typingFrameRef.current !== null) {
+      return;
+    }
+
+    typingFrameRef.current = window.requestAnimationFrame(() => {
+      typingFrameRef.current = null;
+
+      if (!isMountedRef.current || streamingVersionIdRef.current !== versionId) {
+        return;
+      }
+
+      const received = receivedStreamingContentRef.current;
+      const displayed = displayedStreamingContentRef.current;
+      const backlog = received.length - displayed.length;
+
+      if (backlog <= 0) {
+        return;
+      }
+
+      const nextLength = displayed.length + getTypingStepSize(backlog);
+      const nextDisplayed = received.slice(0, nextLength);
+      displayedStreamingContentRef.current = nextDisplayed;
+      syncStreamingVersion(versionId, nextDisplayed, true);
+
+      if (nextDisplayed.length < received.length) {
+        scheduleTypewriter(versionId);
+      }
+    });
+  }
+
+  async function waitForTypewriterToCatchUp(versionId: string) {
+    while (isMountedRef.current && streamingVersionIdRef.current === versionId) {
+      if (
+        displayedStreamingContentRef.current.length >=
+        receivedStreamingContentRef.current.length
+      ) {
+        return;
+      }
+
+      await new Promise<void>((resolve) => {
+        window.setTimeout(resolve, 16);
+      });
+    }
+  }
 
   useEffect(() => {
     document.title = t("workbench:pageTitle.diagnostics");
   }, [t]);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+      optimizeAbortRef.current?.abort();
+      cancelTypingFrame();
+      receivedStreamingContentRef.current = "";
+      displayedStreamingContentRef.current = "";
+      streamingVersionIdRef.current = null;
+    };
+  }, []);
 
   useEffect(() => {
     setPrompt(routeState.prompt);
@@ -107,20 +253,128 @@ export function DiagnosticsPage() {
       return;
     }
 
+    optimizeAbortRef.current?.abort();
+    cancelTypingFrame();
+    const controller = new AbortController();
+    optimizeAbortRef.current = controller;
     setLoadingState(useDiagnostics ? "optimize-diagnostics" : "optimize");
-    await sleep();
-    const nextIndex = versions.length;
-    const nextVersion: VersionRecord = {
-      id: `version-${Date.now()}`,
-      label: getVersionLabel(t, versions.length + 1),
-      content: runMockOptimization(prompt, nextIndex, t, useDiagnostics ? issues : undefined),
-    };
-    setVersions((current) => [...current, nextVersion]);
-    setActiveTabId(nextVersion.id);
-    setLoadingState(null);
+    const nextVersionId = `version-${Date.now()}`;
+    const nextVersionLabel = getVersionLabel(t, versions.length + 1);
+    let receivedDelta = false;
+
+    receivedStreamingContentRef.current = "";
+    displayedStreamingContentRef.current = "";
+    streamingVersionIdRef.current = nextVersionId;
+    setVersions((current) => [
+      ...current,
+      {
+        id: nextVersionId,
+        label: nextVersionLabel,
+        content: "",
+        isStreaming: true,
+      },
+    ]);
+    setActiveTabId(nextVersionId);
+
+    try {
+      const nextContent = await optimizePrompt({
+        prompt,
+        model: selectedModel,
+        issues: useDiagnostics ? issues : undefined,
+        onDelta: (delta) => {
+          if (!isMountedRef.current) {
+            return;
+          }
+
+          receivedDelta = true;
+          receivedStreamingContentRef.current += delta;
+          scheduleTypewriter(nextVersionId);
+        },
+        signal: controller.signal,
+      });
+      const content = nextContent;
+
+      if (!content.trim()) {
+        throw new ChatCompletionError("The gateway returned no completion text.");
+      }
+
+      if (!isMountedRef.current) {
+        return;
+      }
+
+      receivedStreamingContentRef.current = content;
+      scheduleTypewriter(nextVersionId);
+      await waitForTypewriterToCatchUp(nextVersionId);
+
+      if (!isMountedRef.current || streamingVersionIdRef.current !== nextVersionId) {
+        return;
+      }
+
+      cancelTypingFrame();
+      syncStreamingVersion(
+        nextVersionId,
+        displayedStreamingContentRef.current,
+        false,
+      );
+    } catch (error) {
+      if (isMountedRef.current) {
+        cancelTypingFrame();
+        const displayedContent = displayedStreamingContentRef.current;
+        const receivedContent = receivedStreamingContentRef.current;
+        setVersions((current) => {
+          if (!receivedDelta) {
+            return current.filter((version) => version.id !== nextVersionId);
+          }
+
+          return current.map((version) =>
+            version.id === nextVersionId
+              ? {
+                  ...version,
+                  content: displayedContent || receivedContent,
+                  isStreaming: false,
+                }
+              : version,
+            );
+        });
+
+        if (!receivedDelta) {
+          setActiveTabId((current) =>
+            current === nextVersionId ? "diagnostics" : current,
+          );
+        }
+      }
+
+      const message = buildOptimizeErrorMessage(error, t);
+
+      if (message) {
+        showToast(message, "error");
+      }
+    } finally {
+      if (optimizeAbortRef.current === controller) {
+        optimizeAbortRef.current = null;
+      }
+
+      if (streamingVersionIdRef.current === nextVersionId) {
+        receivedStreamingContentRef.current = "";
+        displayedStreamingContentRef.current = "";
+        streamingVersionIdRef.current = null;
+      }
+
+      if (isMountedRef.current) {
+        setLoadingState(null);
+      }
+    }
   }
 
   function handleCloseVersion(versionId: string) {
+    if (streamingVersionIdRef.current === versionId) {
+      optimizeAbortRef.current?.abort();
+      cancelTypingFrame();
+      receivedStreamingContentRef.current = "";
+      displayedStreamingContentRef.current = "";
+      streamingVersionIdRef.current = null;
+    }
+
     setVersions((current) => {
       const next = current.filter((version) => version.id !== versionId);
       if (activeTabId === versionId) {
