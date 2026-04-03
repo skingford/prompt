@@ -1,5 +1,5 @@
 import type { TFunction } from "i18next";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import { SplitPane } from "../components/SplitPane";
@@ -140,26 +140,6 @@ export function DiagnosticsPage() {
     );
   }
 
-  function getTypingStepSize(backlog: number) {
-    if (backlog > 160) {
-      return 14;
-    }
-
-    if (backlog > 96) {
-      return 10;
-    }
-
-    if (backlog > 48) {
-      return 6;
-    }
-
-    if (backlog > 18) {
-      return 3;
-    }
-
-    return 1;
-  }
-
   function scheduleTypewriter(versionId: string) {
     if (typingFrameRef.current !== null) {
       return;
@@ -180,12 +160,16 @@ export function DiagnosticsPage() {
         return;
       }
 
-      const nextLength = displayed.length + getTypingStepSize(backlog);
-      const nextDisplayed = received.slice(0, nextLength);
+      const nextDisplayed = received;
       displayedStreamingContentRef.current = nextDisplayed;
-      syncStreamingVersion(versionId, nextDisplayed, true);
+      startTransition(() => {
+        syncStreamingVersion(versionId, nextDisplayed, true);
+      });
 
-      if (nextDisplayed.length < received.length) {
+      if (
+        displayedStreamingContentRef.current.length <
+        receivedStreamingContentRef.current.length
+      ) {
         scheduleTypewriter(versionId);
       }
     });

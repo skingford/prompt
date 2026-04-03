@@ -1,8 +1,9 @@
 import type { DiagnosticIssue } from "../types";
 
-const DEFAULT_CHAT_COMPLETIONS_URL = "/api/chat/completions";
+const DEFAULT_CHAT_COMPLETIONS_URL = "http://localhost:1086/v1/chat/completions";
 const DEFAULT_TEMPERATURE = 0.4;
 const DEFAULT_MAX_TOKENS = 480;
+const STREAM_RENDER_SLICE_MS = 32;
 
 interface ChatMessage {
   role: "system" | "user";
@@ -27,8 +28,16 @@ interface StreamChunk {
 
 export class ChatCompletionError extends Error {}
 
+function now() {
+  return typeof performance !== "undefined" ? performance.now() : Date.now();
+}
+
 function getGatewayUrl() {
   return import.meta.env.VITE_CHAT_COMPLETIONS_URL?.trim() || DEFAULT_CHAT_COMPLETIONS_URL;
+}
+
+function getGatewayAuthToken() {
+  return import.meta.env.VITE_CHAT_COMPLETIONS_AUTH_TOKEN?.trim() || "";
 }
 
 function buildDiagnosticsGuidance(issues?: DiagnosticIssue[]) {
@@ -113,6 +122,24 @@ function readStreamDelta(rawEvent: string) {
   return content ?? null;
 }
 
+async function yieldToBrowser() {
+  if (
+    typeof window !== "undefined" &&
+    typeof window.requestAnimationFrame === "function" &&
+    typeof document !== "undefined" &&
+    document.visibilityState === "visible"
+  ) {
+    await new Promise<void>((resolve) => {
+      window.requestAnimationFrame(() => resolve());
+    });
+    return;
+  }
+
+  await new Promise<void>((resolve) => {
+    globalThis.setTimeout(resolve, 0);
+  });
+}
+
 export async function optimizePrompt({
   prompt,
   model,
@@ -123,11 +150,18 @@ export async function optimizePrompt({
   let response: Response;
 
   try {
+    const token = getGatewayAuthToken();
+
     response = await fetch(getGatewayUrl(), {
       method: "POST",
       headers: {
         Accept: "text/event-stream, application/json",
         "Content-Type": "application/json",
+        ...(token
+          ? {
+              Authorization: `Bearer ${token}`,
+            }
+          : {}),
       },
       body: JSON.stringify({
         temperature: DEFAULT_TEMPERATURE,
@@ -161,10 +195,11 @@ export async function optimizePrompt({
   const parts: string[] = [];
   let buffer = "";
   let eventLines: string[] = [];
+  let lastRenderYieldAt = now();
 
   function flushEvent() {
     if (!eventLines.length) {
-      return;
+      return false;
     }
 
     const eventData = eventLines.join("\n");
@@ -172,29 +207,40 @@ export async function optimizePrompt({
     const delta = readStreamDelta(eventData);
 
     if (!delta) {
-      return;
+      return false;
     }
 
     parts.push(delta);
     onDelta?.(delta);
+    return true;
   }
 
   while (true) {
     const { done, value } = await reader.read();
-    buffer += decoder.decode(value, { stream: !done });
+    buffer += decoder.decode(value ?? new Uint8Array(), { stream: !done });
 
     const lines = buffer.split(/\r?\n/);
     buffer = lines.pop() ?? "";
+    let emittedDelta = false;
 
     for (const line of lines) {
       if (!line) {
-        flushEvent();
+        emittedDelta = flushEvent() || emittedDelta;
         continue;
       }
 
       if (line.startsWith("data:")) {
         eventLines.push(line.slice(5).trimStart());
       }
+    }
+
+    if (
+      !done &&
+      emittedDelta &&
+      now() - lastRenderYieldAt >= STREAM_RENDER_SLICE_MS
+    ) {
+      await yieldToBrowser();
+      lastRenderYieldAt = now();
     }
 
     if (done) {
